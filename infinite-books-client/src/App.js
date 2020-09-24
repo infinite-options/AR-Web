@@ -59,7 +59,6 @@ const styles = {
     fontWeight: "bolder",
     marginTop: 50,
     marginBottom: 50,
-    fontWeight: "bold",
   },
   Card: {
     margin: 4,

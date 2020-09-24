@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
+import Link from "react-router-dom";
+import Route from "react-router-dom";
 
 class NavBar extends Component {
   state = {};
@@ -15,7 +17,7 @@ class NavBar extends Component {
             <Nav.Link>Books</Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link>Authors</Nav.Link>
+            <Nav.Link href="Aregister.html">Authors</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link>Readers</Nav.Link>
