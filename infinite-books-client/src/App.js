@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
+import axios from "axios";
 import NavBar from "./components/navbar";
 import ReactPlayer from "react-player";
 import { Parallax } from "react-parallax";
+
 // MUI
 import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
@@ -21,6 +23,7 @@ import book2 from "./images/book2.jpg";
 import lib from "./images/lib.jpg";
 import ShareIcon from "@material-ui/icons/Share";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
+import ReaderDashboard from "./components/readerdashboard";
 
 /*
 TODOs:
@@ -54,10 +57,18 @@ const styles = {
     height: "1px",
   },
   headline2: {
-    fontSize: 42,
-    textAlign: "center",
+    fontFamily: "Times New Roman",
+    fontSize: 20,
     fontWeight: "bolder",
+    color: "#309aac",
+    textAlign: "center",
     marginTop: 50,
+  },
+  headline3: {
+    fontFamily: "Dancing Script",
+    fontSize: 20,
+    color: "#309aac",
+    textAlign: "center",
     marginBottom: 50,
   },
   Card: {
@@ -160,6 +171,67 @@ const styles = {
 };
 
 function App() {
+
+  const url = ""; // TODO
+  const [result, setPost] = useState({
+    business_uid: "",
+    business_type: "",
+    business_type2: ""
+  });
+  const clear = () => {
+    setResult([]);
+    setPost({business_type: "", business_uid: "", business_type2: ""}); // TODO
+  };
+  const sendGetSlash = e => {
+    const get_url = url + e.target.value;
+    console.log(get_url);
+    axios.get(get_url).then(res => {
+      console.log(res);
+      setResult(res.data.result);
+    })
+    .catch(err => {
+      console.error(err);
+    });
+  };
+
+  const handleChange = e => {
+    e.persist();
+    setPost({...post, [e.target.name]: e.target.value});
+    console.log(post);
+  };
+
+  const sendPostParam = e => {
+    const get_url = url + e.target.value;
+    console.log(get_url);
+    axios.post(`${get_url}/${post.business_type}`) // TODO
+    .then(res => {
+      console.log(res);
+      let arr = [{message: res.data.message}];
+      setResult(arr);
+    }).catch(err => {
+      console.error(err);
+    });
+  };
+
+  const sendPostArgs = e => {
+    const get_url = url + e.target.value;
+    console.log(get_url);
+    let x = { 
+      business_uid: post.business_uid,
+      business_type: post.business_type2
+    };
+    console.log(x);
+    axios.post(get_url, x)
+    .then(res => {
+      console.log(res);
+      let arr = [{message: res.data.message}];
+      setResult(arr);
+    })
+    .catch(err => {
+      console.error(err);
+    });
+  };
+
   return (
     <div className="App">
       <div style={styles.headline}>Infinite Books</div>
@@ -171,7 +243,11 @@ function App() {
       <NavBar />
       <Divider variant="middle" style={styles.divider} />
 
-      <div style={styles.headline2}>Need to Add Headline Here</div>
+      <p style={styles.headline2}>For writers, a place to get meaningful user and data driven feedback on your work.<br />
+      For readers, a source for books for you to fall in love with and help improve.</p>
+      <p style={styles.headline3}>“A reader lives a thousand lives before he dies... The man who never reads lives only one.” – George R.R. Martin </p>
+
+      <ReaderDashboard />
 
       <Grid container>
         <Grid item xs={6}>
