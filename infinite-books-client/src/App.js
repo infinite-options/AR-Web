@@ -8,8 +8,8 @@ import Divider from "@material-ui/core/Divider";
 
 // components
 import Home from "./components/pages/HomePage/Home";
-import ReaderDashboard from "./components/ReaderDashboard";
-import Navbar from "./components/Navbar";
+import ReaderDashboard from "./components/readerdashboard";
+import Navbar from "./components/navbar";
 
 // MUI
 import Grid from "@material-ui/core/Grid";
