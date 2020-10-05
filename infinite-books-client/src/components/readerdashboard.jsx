@@ -56,6 +56,8 @@ UI: Dropdown that loads book titles from database
           "rating_content":"testing"     
         }
 
+        TODO: 
+
 */
 
 function ReaderDashboard() {
@@ -111,8 +113,8 @@ function ReaderDashboard() {
   };
 
   return (
-    <div className="row">
-      <div className="getRequests" style={styles.getRequests}></div>
+    <div>
+      {/* <div className="getRequests" style={styles.getRequests}></div> */}
       <div style={styles.inputDiv}>
         <div className="card">
           <div style={styles.text}> 200-000019</div>
