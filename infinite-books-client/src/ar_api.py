@@ -350,7 +350,6 @@ def couponExists(coupon_id):
 # Queries for Untitled Books
 
 class AllBooks(Resource):
-
     def get(self):
         response = {}
         items = {}
@@ -484,7 +483,118 @@ class AllReaders(Resource):
         finally:
             disconnect(conn)
 
+# Reviews, get method tbd but for now it returns review by book
+# Post adds a review
+class Reviews(Resource):
+    def get(self, rev_book_uid):
+        response = {}
+        items = {}
+        try:
+            conn = connect()
+            query = """
+                    SELECT * FROM ar.reviews
+                    WHERE rev_book_uid = \'""" + rev_book_uid + """\'
+                    """
+            items = execute(query, 'get', conn)
+
+            response['message'] = 'Reviews get successful'
+            response['result'] = items
+            return response, 200
+        except:
+            raise BadRequest('Request failed, please try again later.')
+        finally:
+            disconnect(conn)
+
+        # http://localhost:4000/api/v2/couponDetails/Jane6364
+        # https://tsx3rnuidi.execute-api.us-west-1.amazonaws.com/dev/api/v2/couponDetails/Jane6364
+
+# TODO 
+    def post(self):
+        response = {}
+        items = {}
+        try:
+            conn = connect()
+            data = request.get_json(force=True)
+
+            reader_id = data['reader_id']
+            num_used = (data['num_used'])
+            print("reader_id", reader_id)
+
+            query = '''
+                    INSERT INTO ar.reviews
+                    SET num_used = \'''' + str(num_used) + '''\'
+                    WHERE coupon_uid = \'''' + str(coupon_uid) + '''\';
+                    '''
+            items = execute(query,'post',conn)
+
+            response['message'] = 'CouponDetails POST successful'
+            response['result'] = items
+            return response, 200
+        except:
+            raise BadRequest('Q3 POST Request failed, please try again later.')
+        finally:
+            disconnect(conn)
+
+
+
+class UpdateFavoritesParam(Resource):
+    # QUERY 4 UPDATE A SPECIFIC BUSINESS PARAMETER
+    def post(self, business_type):
+            response = {}
+            items = []
+            print("favorites", favorites)
+            try:
+                conn = connect()
+                query = """
+                        UPDATE ar.users
+                        SET favorites = \'""" + favorites + """\'
+                        WHERE user_uid = '100-000001';
+                        """
+                items = execute(query, 'post', conn)
+
+
+                items['message'] = 'Favorites info updated'
+                items['code'] = 200
+                return items
+            except:
+                print("Error happened while updating users table")
+                raise BadRequest('Request failed, please try again later.')
+            finally:
+                disconnect(conn)
+                print('process completed')
+
+
+class UpdateFavoritesParamJSON(Resource):
+
+    def post(self):
+        response = {}
+        items = {}
+        try:
+            conn = connect()
+            data = request.get_json(force=True)
+            user_uid = data['business_uid']
+            favorites = data['favorites']
+            print("user_uid", user_uid)
+            print("favorites", favorites)
+
+            query = """
+                    UPDATE ar.users
+                    SET favorites = \'""" + favorites + """\'
+                    WHERE user_uid = \'""" + user_uid + """\';
+                    """
+            items = execute(query, 'post', conn)
+
+            response['message'] = 'JSON POST successful'
+            response['result'] = items
+            return response, 200
+        except:
+            raise BadRequest('JSON POST Request failed, please try again later.')
+        finally:
+            disconnect(conn)
 #----------------------------------------------------------------------------------
+
+
+
 
 
 
@@ -638,8 +748,39 @@ class SubscriptionsbyBusiness(Resource):
 
 
 
+# -- 3.  GET Query using a argument to pass in a parameter
+# -- include parameter in request.args
+class OneUserArg(Resource):
 
-# QUERY 3
+    def get(self):
+        response = {}
+        items = {}
+        try:
+            conn = connect()
+            user_uid = request.args['user_uid']
+
+            query = """ # Returns request from 
+                SELECT * FROM ar.users 
+                WHERE user_uid = \'""" + user_uid + """\';
+                """
+                
+            items = execute(query, 'get', conn)
+
+            response['message'] = 'GET OneUserArg successful'
+            response['result'] = items['result']
+            return response, 200
+        except:
+            raise BadRequest('Request failed, please try again later.')
+        finally:
+            disconnect(conn)
+        
+        # ENDPOINT AND JSON OBJECT THAT WORKS
+        # http://localhost:4000/api/v2/onebusinessarg?business_uid=200-000001
+        # https://tsx3rnuidi.execute-api.us-west-1.amazonaws.com/dev/api/v2/onebusinessarg?business_uid=200-000001
+
+
+
+# QUERY 3A
 # RETURNS ALL COUPON DETAILS FOR A SPECIFIC COUPON
 class CouponDetails(Resource):
     def get(self, coupon_id):
@@ -824,27 +965,6 @@ class RefundDetailsNEW(Resource):
             raise BadRequest('Request failed, please try again later.')
         finally:
             disconnect(conn)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
