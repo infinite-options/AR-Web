@@ -7,7 +7,8 @@ export const homeObjOne = {
     "For writers, a place to get meaningful user and data driven feedback on your work. \nFor readers, a source for books to fall in love with and help improve.",
   description:
     "“Inspirational quote about reading.” – Author R.R. Writerperson",
+  buttonLabel: "Get Started",
   imgStart: "",
-  img: "src/components/pages/HomePage/book_stack.png",
-  alt: "",
+  img: "/images/reader.jpg",
+  alt: "Picture",
 };

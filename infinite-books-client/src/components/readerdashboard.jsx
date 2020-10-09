@@ -8,9 +8,9 @@
   Future UI changes (requires db schema change):
     Review form:
         Dropdown for "type" with values hard-coded in, tbd but includes spelling/typos etc.
-        Text box for pg#, optional field.
+        Text box for pg# (optional field).
         Text box for Description/Comments
-        + button to load another review form, makes container scrollable if > capacity
+        "+"" button to load another review form, makes container scrollable if > capacity
         Save button that puts review in db
 
         POST example: 
@@ -59,7 +59,7 @@ const styles = {
     flexWrap: "wrap",
     height: 300,
     width: 250,
-    //border: "1px solid gray",
+    border: "1px solid gray",
     margin: "0 auto",
     fontSize: 6,
   },

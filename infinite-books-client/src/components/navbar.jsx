@@ -73,7 +73,7 @@ function NavBar() {
               <li className="nav-btn" onClick={closeMobileMenu}>
                 {button ? (
                   <Link to="/sign-up" className="btn-link">
-                    <Button buttonStyle="btn--outline">Sign Up</Button>
+                    <Button buttonStyle="btn--primary">Sign Up</Button>
                   </Link>
                 ) : (
                   <Link to="/sign-up" className="btn-link">

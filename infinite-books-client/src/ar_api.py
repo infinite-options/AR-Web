@@ -1,3 +1,5 @@
+# NOTE: this is not the actual API file for the author-reader project. Use only for reference.
+
 #To run program:  python3 fth_api.py prashant
 
 #README:  if conn error make sure password is set properly in RDS PASSWORD section

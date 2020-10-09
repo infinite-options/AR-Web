@@ -17,15 +17,15 @@ Hero section: a customizable "page" of fixed-height
 
 function HeroSection({
   lightBg,
-  topLine,
   lightText,
   lightTextDesc,
+  topLine,
   headline,
   description,
   buttonLabel,
   img,
-  alt,
   imgStart,
+  alt,
 }) {
   return (
     <>
