@@ -10,8 +10,10 @@
         Dropdown for "type" with values hard-coded in, tbd but includes spelling/typos etc.
         Text box for pg# (optional field).
         Text box for Description/Comments
+        Subcomponent-ize the review forms
         "+"" button to load another review form, makes container scrollable if > capacity
         Save button that puts review in db
+        
 
         POST example: 
         https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/InsertNewReview
@@ -34,10 +36,12 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import Paper from "@material-ui/core/Paper";
 
 const styles = {
-  outer: {
+  container: {
     display: "flex",
+    flexWrap: "nowrap",
     justifyContent: "space-between",
     //border: "1px solid gray",
     height: "500px",
@@ -45,6 +49,7 @@ const styles = {
     margin: 15,
     padding: 15,
     backgroundColor: "#e0f2f1",
+    borderRadius: 5,
   },
   dropdownDiv: {
     textAlign: "center",
@@ -53,31 +58,36 @@ const styles = {
     width: "50%",
     height: "100%",
     marginLeft: "auto",
+    marginRight: 5,
   },
   imgDiv: {
+    textAlign: "center",
+    alignItems: "center",
+    alignContent: "center",
     display: "flex",
     flexWrap: "wrap",
     height: 300,
     width: 250,
-    border: "1px solid gray",
+    border: "1px dashed gray",
     margin: "0 auto",
-    fontSize: 6,
+    fontSize: 8,
+    paddingLeft: 50,
   },
   inputDiv: {
     display: "flex",
-    flexWrap: "nowrap",
+    flexWrap: "wrap",
     height: "100%",
     textAlign: "center",
+    alignItems: "center",
+    alignContent: "center",
     width: "50%",
-    padding: "15px",
-    //border: "1px solid gray",
-    marginRight: "auto",
+    padding: "2px",
   },
   input: {
-    width: "50%",
-    marginLeft: "auto",
-    marginRight: "auto",
-    marginBottom: 4,
+    width: "75%",
+    margin: 2,
+    padding: 5,
+    marginLeft: 350,
   },
   text: {
     padding: "2px",
@@ -182,10 +192,9 @@ function ReaderDashboard() {
   };
 
   // bool for handling conditional render
-  const [bookIsSelected, setBookIsSelected] = useState(false);
+  const [bookIsSelected, setBookIsSelected] = useState(false); // TODO change to false after testing
   const handleSelect = (e) => {
     const newBookUid = e.target.value;
-    console.log(newBookUid);
     setBookUid(newBookUid);
   };
 
@@ -194,25 +203,23 @@ function ReaderDashboard() {
     if (bookUid === "") {
       // Default value, nothing selected or top "select a book" option selected
       setBookIsSelected(false);
-      console.log(bookIsSelected);
     } else {
       setBookIsSelected(true);
-      console.log(bookIsSelected);
     }
   }, [bookUid]);
 
   return (
     <div>
-      {/* Outer Container */}
+      {/* outmost container */}
       <Grid
         container
         direction="row"
         justify="center"
         alignItems="center"
-        style={styles.outer}
+        style={styles.container}
       >
         {/* Left inner div containing dropdown and book cover image */}
-        <Grid item style={styles.dropdownDiv}>
+        <Paper elevation={3} style={styles.dropdownDiv}>
           <FormControl style={styles.FormControl}>
             <InputLabel style={styles.InputLabel}>Book title</InputLabel>
             <Select value={bookUid} onChange={handleSelect}>
@@ -229,50 +236,53 @@ function ReaderDashboard() {
               {bookUid} -- cover image coming soon
             </div>
           )}
-        </Grid>
+        </Paper>
 
         {/* Right inner div containing feedback forms */}
+
         {bookIsSelected ? (
-          <Grid
-            container
-            direction="column"
-            justify="center"
-            alignItems="stretch"
-            style={styles.inputDiv}
-          >
-            <input
-              name="comments"
-              style={styles.input}
-              value={post.comments}
-              placeholder="comments"
-              onChange={handleChange}
-            />
-
-            <input
-              name="rating_title"
-              style={styles.input}
-              value={post.rating_title}
-              placeholder="rating_title"
-              onChange={handleChange}
-            />
-
-            <input
-              name="rating_content"
-              style={styles.input}
-              value={post.rating_content}
-              placeholder="rating_content"
-              onChange={handleChange}
-            />
-            <button
-              name="submit"
-              style={styles.input}
-              className="btn btn-primary"
-              value="/api/v2/InsertNewReview"
-              onClick={sendPostArgs}
+          <Paper elevation={3} style={styles.inputDiv}>
+            <Grid
+              container
+              direction="column"
+              justify="center"
+              alignItems="stretch"
+              style={styles.inputDiv}
             >
-              Submit
-            </button>
-          </Grid>
+              <input
+                name="rating_title"
+                style={styles.input}
+                value={post.rating_title}
+                placeholder="rating_title"
+                onChange={handleChange}
+              />
+
+              <input
+                name="rating_content"
+                style={styles.input}
+                value={post.rating_content}
+                placeholder="rating_content"
+                onChange={handleChange}
+              />
+              <input
+                name="comments"
+                value={post.comments}
+                rows={4}
+                style={styles.input}
+                placeholder="comments"
+                onChange={handleChange}
+              />
+              <button
+                name="submit"
+                style={styles.input}
+                className="btn btn-primary"
+                value="/api/v2/InsertNewReview"
+                onClick={sendPostArgs}
+              >
+                Submit
+              </button>
+            </Grid>
+          </Paper>
         ) : (
           <Grid
             container
