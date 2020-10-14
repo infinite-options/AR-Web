@@ -40,7 +40,7 @@ function Books(props) {
 
   const getAllBooks = () => {
     // Fetches books from db
-    const AllBooksUrl = url + "/api/v2/AllBooks";
+    const AllBooksUrl = url + "/api/v2/AuthorForEachBook";
     console.log(AllBooksUrl);
     axios
       .get(AllBooksUrl)

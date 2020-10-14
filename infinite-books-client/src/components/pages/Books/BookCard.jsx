@@ -114,7 +114,7 @@ function BookCard(props) {
         <div style={styles.imgDiv}> </div>
         <div style={styles.infoDiv}>
           <p style={styles.title}>{props.title}</p>
-          <p style={styles.author}>{/* TODO: get author name */}Author Name</p>
+          <p style={styles.author}>{props.author}</p>
         </div>
       </Paper>
       <Modal
@@ -140,9 +140,9 @@ function BookCard(props) {
               <div style={styles.modalInfo}>
                 <h1>{props.title}</h1>
                 <p>Author: {props.author}</p>
-                <p>Genre: {props.genre}</p>
-                <p>Number of pages: {props.num_pages}</p>
-                <p>Format: {props.format}</p>
+                {props.genre && <p>Genre: {props.genre}</p>}
+                {props.num_pages && <p>Number of pages: {props.num_pages}</p>}
+                {props.format && <p>Format: {props.format}</p>}
                 <p>Description of book</p>
                 <Link to={props.link}>
                   <Button buttonSize="btn--wide" buttonColor="blue">
