@@ -28,7 +28,6 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Grid } from "@material-ui/core";
 
 // MUI
 import InputLabel from "@material-ui/core/InputLabel";
@@ -37,6 +36,7 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import Paper from "@material-ui/core/Paper";
+import { Grid } from "@material-ui/core";
 
 const styles = {
   container: {
@@ -102,9 +102,11 @@ const styles = {
   },
 };
 
-function ReaderDashboard() {
+function ReaderDashboard(props) {
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
-  const [result, setResult] = useState([]);
+  //const [result, setResult] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [bookUid, setBookUid] = useState("");
   const [post, setPost] = useState({
     rev_book_uid: "",
     reader_id: "",
@@ -112,10 +114,6 @@ function ReaderDashboard() {
     rating_title: "",
     rating_content: "",
   });
-  const [books, setBooks] = useState([]);
-
-  // Dropdown menu stuff.
-  const [bookUid, setBookUid] = useState("");
 
   // Emulates componentDidMount -> loads books from db on component load
   useEffect(
@@ -150,7 +148,7 @@ function ReaderDashboard() {
   });
 
   const clear = () => {
-    setResult([]);
+    //setResult([]);
     setPost({
       rev_book_uid: "",
       reader_id: "",
@@ -182,8 +180,8 @@ function ReaderDashboard() {
       .post(get_url, payload)
       .then((res) => {
         console.log(res);
-        let arr = [{ message: res.data.message }];
-        setResult(arr);
+        //let arr = [{ message: res.data.message }];
+        //setResult(arr);
       })
       .catch((err) => {
         console.error(err);
@@ -192,7 +190,7 @@ function ReaderDashboard() {
   };
 
   // bool for handling conditional render
-  const [bookIsSelected, setBookIsSelected] = useState(false); // TODO change to false after testing
+  const [bookIsSelected, setBookIsSelected] = useState(false);
   const handleSelect = (e) => {
     const newBookUid = e.target.value;
     setBookUid(newBookUid);

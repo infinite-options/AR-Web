@@ -1,6 +1,6 @@
 import React from "react";
 import "./HeroSection.css";
-import { Button } from "./Button";
+import { Button } from "../../Button";
 import { Link } from "react-router-dom";
 
 /*
@@ -10,9 +10,6 @@ Hero section: a customizable "page" of fixed-height
  where homeObjOne is an object containing keys and values
  corresponding to HeroSection()'s paramters and what you
  want them to be.
-
- TODO: image not displaying properly , url located in pages/Data.jsx
-
 */
 
 function HeroSection({

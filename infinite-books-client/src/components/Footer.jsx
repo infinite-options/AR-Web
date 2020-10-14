@@ -36,7 +36,7 @@ function Footer() {
       <div className="footer-links">
         <div className="footer-link-wrapper">
           <div className="footer-link-items">
-            <h2>About us</h2>
+            <h2>About</h2>
             <Link to="/sign-up">How it works</Link>
             <Link to="/">Testimonials</Link>
             <Link to="/">Careers</Link>
@@ -44,7 +44,7 @@ function Footer() {
             <Link to="/">Terms of Service</Link>
           </div>
           <div className="footer-link-items">
-            <h2>Contact us</h2>
+            <h2>Contact</h2>
             <Link to="/">Support</Link>
             <Link to="/">Marketing</Link>
             <Link to="/">Destinations</Link>
@@ -53,7 +53,7 @@ function Footer() {
         </div>
         <div className="footer-link-wrapper">
           <div className="footer-link-items">
-            <h2>Follow us</h2>
+            <h2>Follow</h2>
             <Link to="/">Instagram</Link>
             <Link to="/">Facebook</Link>
             <Link to="/">Youtube</Link>
