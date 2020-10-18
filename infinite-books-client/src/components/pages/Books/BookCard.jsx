@@ -101,6 +101,7 @@ const styles = {
 
 function BookCard(props) {
   const [open, setOpen] = React.useState(false);
+
   const handleOpen = () => {
     setOpen(true);
   };

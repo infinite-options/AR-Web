@@ -9,7 +9,6 @@
   white-space: nowrap;
 }
 .btn--primary {
-  background-color: var(--primary);
   color: #31555c;
   border: 1px solid var(--primary);
 }

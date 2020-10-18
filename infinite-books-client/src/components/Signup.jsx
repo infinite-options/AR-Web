@@ -1,140 +1,106 @@
-import React, { useState, useEffect } from "react";
+// TODO: validate email address and password
+
+import React, { useState } from "react";
 import axios from "axios";
-import { Grid } from "@material-ui/core";
+import { Button } from "./Button";
+import { Link } from "react-router-dom";
 
 // MUI
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Paper from "@material-ui/core/Paper";
-import { MDBContainer, MDBRow, MDBCol, MDBBtn } from 'mdbreact';
+import { Button as MuiButton, Paper } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
+// Icons & images
+import { FaGoogle, FaFacebookF, FaApple, FaEnvelope } from "react-icons/fa";
+import { IconContext } from "react-icons/lib";
 import logo from "./10books.jpeg";
 
 const styles = {
-    container: {
-      display: "flex",
-      flexWrap: "nowrap",
-      justifyContent: "space-between",
-      //border: "1px solid gray",
-      height: "500px",
-      width: "auto",
-      margin: 15,
-      padding: 15,
-      backgroundColor: "#e0f2f1",
-      borderRadius: 5,
-    },
-    dropdownDiv: {
-      textAlign: "center",
-      alignItems: "center",
-      //border: "1px solid gray",
-      width: "50%",
-      height: "100%",
-      marginLeft: "auto",
-      marginRight: 5,
-    },
-    imgDiv: {
-      textAlign: "center",
-      alignItems: "center",
-      alignContent: "center",
-      display: "flex",
-      flexWrap: "wrap",
-      height: 300,
-      width: 250,
-      border: "1px dashed gray",
-      margin: "0 auto",
-      fontSize: 8,
-      paddingLeft: 50,
-    },
-    inputDiv: {
-      display: "flex",
-      flexWrap: "wrap",
-      height: "100%",
-      textAlign: "center",
-      alignItems: "center",
-      alignContent: "center",
-      width: "50%",
-      padding: "2px",
-    },
-    input: {
-      width: "75%",
-      margin: 2,
-      padding: 5,
-      marginLeft: 350,
-    },
-    text: {
-      padding: "2px",
-      color: "gray",
-    },
-    FormControl: {
-      padding: 20,
-      width: 250,
-    },
-    InputLabel: {
-      padding: 20,
-    },
-  };
+  container: {
+    display: "flex",
+    flexWrap: "nowrap",
+    justifyContent: "space-between",
+    //border: "1px solid gray",
+    height: "500px",
+    width: "auto",
+    margin: 15,
+    padding: 15,
+    backgroundColor: "#e0f2f1",
+    borderRadius: 5,
+  },
+  dropdownDiv: {
+    textAlign: "center",
+    alignItems: "center",
+    //border: "1px solid gray",
+    width: "50%",
+    height: "100%",
+    marginLeft: "auto",
+    marginRight: 5,
+  },
+  inputDiv: {
+    display: "flex",
+    flexWrap: "wrap",
+    height: "100%",
+    textAlign: "center",
+    alignItems: "center",
+    alignContent: "center",
+    width: "65%",
+    padding: "2px",
+  },
+  text: {
+    padding: "2px",
+    color: "gray",
+  },
+
+  emailSignIn: {
+    width: "50%",
+    borderRight: "1px solid lightgray",
+  },
+  input: {
+    width: "75%",
+    margin: 2,
+    padding: 5,
+    marginBottom: 20,
+  },
+  buttonGroup: {
+    width: 225,
+    height: "auto",
+    textAlign: "center",
+    alignItems: "center",
+    alignContent: "center",
+    marginLeft: 50,
+  },
+  button: {
+    textTransform: "none",
+    fontSize: 14,
+    backgroundColor: "#31555c",
+    color: "#fff",
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: 7,
+    marginBottom: 7,
+    marginLeft: 10,
+    marginRight: 15,
+  },
+  terms: {
+    fontSize: 14,
+    marginTop: 50,
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+};
 
 function Signup() {
-    const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
-  const [result, setResult] = useState([]);
+  const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
+
   const [post, setPost] = useState({
-    rev_book_uid: "",
-    reader_id: "",
-    comments: "",
-    rating_title: "",
-    rating_content: "",
-  });
-  const [books, setBooks] = useState([]);
-  
-  // Dropdown menu stuff.
-  const [bookUid, setBookUid] = useState("");
-
-  // Emulates componentDidMount -> loads books from db on component load
-  useEffect(
-    () => {
-      getAllBooks();
-    },
-    // pass an array as an optional second argument to avoid infinite loop
-    []
-  );
-
-  const getAllBooks = () => {
-    // Fetches books from db
-    const AllBooksUrl = url + "/api/v2/AllBooks";
-    console.log(AllBooksUrl);
-    axios
-      .get(AllBooksUrl)
-      .then((res) => {
-        console.log(res);
-        setBooks(res.data.result);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
-
-  // parses JSON object into kvp { book_uid: title }
-  const dropdownItems = [];
-  books.forEach((bookObject) => {
-    dropdownItems.push(
-      <MenuItem value={bookObject["book_uid"]}>{bookObject["title"]}</MenuItem>
-    );
+    email: "",
+    password: "",
   });
 
   const clear = () => {
-    setResult([]);
     setPost({
-      username: "",
-      first_name: "",
-      last_name: "",
-      role: "",
       email: "",
-      phone: "",
-      interest: "",
-      hours: "",
-      favorites: "",
+      password: "",
     });
   };
 
@@ -149,15 +115,8 @@ function Signup() {
     const get_url = url + e.target.value;
     console.log(get_url);
     let payload = {
-      username: post.username,
-      first_name: post.first_name,
-      last_name: post.last_name,
-      role: post.role,
       email: post.email,
-      phone: post.phone,
-      interest: post.interest,
-      hours: post.hours,
-      favorites: post.favorites,
+      password: post.password,
     };
     console.log(payload);
     axios
@@ -165,7 +124,7 @@ function Signup() {
       .then((res) => {
         console.log(res);
         let arr = [{ message: res.data.message }];
-        setResult(arr);
+        console.log(arr);
       })
       .catch((err) => {
         console.error(err);
@@ -173,130 +132,94 @@ function Signup() {
     clear();
   };
 
-  // bool for handling conditional render
-  const [bookIsSelected, setBookIsSelected] = useState(false); // TODO change to false after testing
-  const handleSelect = (e) => {
-    const newBookUid = e.target.value;
-    setBookUid(newBookUid);
-  };
+  return (
+    <>
+      <IconContext.Provider value={{ color: "#309aac" }}>
+        {/* outmost container */}
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="center"
+          style={styles.container}
+        >
+          <center>
+            <img src={logo} width="50%" height="50%" alt="" />
+          </center>
 
-  // tracks state of bookuid to re-render after dropdown selection
-  useEffect(() => {
-    if (bookUid === "") {
-      // Default value, nothing selected or top "select a book" option selected
-      setBookIsSelected(false);
-    } else {
-      setBookIsSelected(true);
-    }
-  }, [bookUid]);
-
-    return (
-    <div>
-      {/* outmost container */}
-      <Grid
-        container
-        direction="row"
-        justify="center"
-        alignItems="center"
-        style={styles.container}
-      >
-        {/* Left inner div containing dropdown and book cover image */}
-        <center><img src={logo} width="50%" height="50%" /></center>
-
-        {/* Right inner div containing feedback forms */}
           <Paper elevation={3} style={styles.inputDiv}>
-          <Grid
-            container
-            direction="column"
-            justify="center"
-            alignItems="stretch"
-            style={styles.inputDiv}
-          >
-            <input
-              name="username"
-              style={styles.input}
-              value={post.username}
-              placeholder="username"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="first_name"
-              style={styles.input}
-              value={post.first_name}
-              placeholder="first_name"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="last_name"
-              style={styles.input}
-              value={post.last_name}
-              placeholder="last_name"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="role"
-              style={styles.input}
-              value={post.role}
-              placeholder="role"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="email"
-              style={styles.input}
-              value={post.email}
-              placeholder="email"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="phone"
-              style={styles.input}
-              value={post.phone}
-              placeholder="phone"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="interest"
-              style={styles.input}
-              value={post.interest}
-              placeholder="interest"
-              onChange={handleChange}
-            />
-            <input
-              name="hours"
-              value={post.hours}
-              rows={4}
-              style={styles.input}
-              placeholder="hours"
-              onChange={handleChange}
-            />
-  
-            <input
-              name="favorites"
-              style={styles.input}
-              value={post.favorites}
-              placeholder="favorites"
-              onChange={handleChange}
-            />
-            <button
-              name="submit"
-              style={styles.input}
-              className="btn btn-primary"
-              value="/api/v2/InsertNewUser"
-              onClick={sendPostArgs}
-            >
-              Submit
-            </button>
-          </Grid>
-        </Paper>
-      </Grid>
-    </div>
-    );
-};
+            <div style={styles.emailSignIn}>
+              <FaEnvelope size={32} style={{ margin: 5 }} />
+              <p style={{ fontSize: 24 }}>Register With Email</p>
+              <p>Email address:</p>
+
+              <input
+                name="email"
+                type="email"
+                style={styles.input}
+                value={post.email}
+                placeholder="Email"
+                onChange={handleChange}
+              />
+              <p>Password:</p>
+              <input
+                name="password"
+                type="password"
+                style={styles.input}
+                value={post.password}
+                placeholder="Password"
+                onChange={handleChange}
+              />
+
+              <Button
+                buttonStyle="btn--primary"
+                name="submitButton"
+                value="/api/v2/InsertNewUser"
+                onClick={sendPostArgs}
+              >
+                Create Account
+              </Button>
+            </div>
+            <div style={styles.buttonGroup}>
+              <p style={{ fontSize: 22, marginBottom: 30 }}>Or...</p>
+              <MuiButton
+                variant="contained"
+                color="default"
+                style={styles.button}
+                startIcon={<FaGoogle />}
+              >
+                Register With Google
+              </MuiButton>
+              <MuiButton
+                variant="contained"
+                color="default"
+                style={styles.button}
+                startIcon={<FaFacebookF />}
+              >
+                Register With Facebook
+              </MuiButton>
+              <MuiButton
+                variant="contained"
+                color="default"
+                style={styles.button}
+                startIcon={<FaApple />}
+              >
+                Register With Apple
+              </MuiButton>
+            </div>
+
+            <div style={styles.terms}>
+              <p style={{ fontSize: 10 }}>
+                By registering an account you agree to our{" "}
+                <Link to="/">Terms of Use</Link> and{" "}
+                <Link to="/">Privacy Policy.</Link>
+              </p>
+            </div>
+          </Paper>
+        </Grid>
+      </IconContext.Provider>
+    </>
+  );
+}
 
 export default Signup;
