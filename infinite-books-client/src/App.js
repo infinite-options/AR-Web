@@ -4,12 +4,12 @@ import { Route, HashRouter } from "react-router-dom";
 
 // components
 import Home from "./components/pages/HomePage/Home";
-import ReaderDashboard from "./components/ReaderDashboard";
-import Navbar from "./components/Navbar";
+import ReaderDashboard from "./components/readerdashboard";
+import Navbar from "./components/navbar";
 import Footer from "./components/Footer";
 import Books from "./components/pages/Books/Books";
 import Signup from "./components/Signup";
-import Author from "./components/Author";
+import Author from "./components/author";
 
 const styles = {
   hr: {
