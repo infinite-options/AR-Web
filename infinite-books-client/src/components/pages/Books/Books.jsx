@@ -64,6 +64,8 @@ function Books(props) {
         // TODO: add description column to books table and put it here
         num_pages={bookObject["num_pages"]}
         format={bookObject["format"]}
+        book_cover_image={bookObject["book_cover_image"]}
+        description={bookObject["description"]}
         link={bookObject["link"]}
       />
     );

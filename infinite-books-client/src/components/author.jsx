@@ -1,3 +1,11 @@
+/* TODO: 
+  Profile page for authors
+  Includes:
+    author info (name, "pen name" etc)
+    target demographic info -> who I want to read my books
+
+*/
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Grid } from "@material-ui/core";

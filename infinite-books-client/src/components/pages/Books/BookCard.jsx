@@ -17,8 +17,8 @@ import { Link } from "react-router-dom";
 
 const styles = {
   cardContainer: {
-    height: 300,
-    width: 200,
+    height: 340,
+    width: 180,
     margin: 12,
     padding: 10,
     backgroundColor: "#e0f2f1",
@@ -26,9 +26,8 @@ const styles = {
   },
   imgDiv: {
     display: "flex",
-    height: "70%",
     width: "auto",
-    border: "1px dashed black",
+    border: "1px solid lightgrey",
     textAlign: "center",
     alignItems: "center",
     alignContent: "center",
@@ -74,9 +73,9 @@ const styles = {
   },
   modalImg: {
     width: 300,
-    height: 480,
+    height: 402,
     padding: "auto",
-    border: "1px dashed black",
+    border: "1px solid lightgrey",
     textAlign: "center",
     alignItems: "center",
     alignContent: "center",
@@ -112,7 +111,13 @@ function BookCard(props) {
   return (
     <React.Fragment>
       <Paper elevation={2} style={styles.cardContainer} onClick={handleOpen}>
-        <div style={styles.imgDiv}> </div>
+        <div style={styles.imgDiv}>
+          <img
+            src={props.book_cover_image}
+            alt="Cover coming soon"
+            style={{ height: "220px", width: "160px" }}
+          />
+        </div>
         <div style={styles.infoDiv}>
           <p style={styles.title}>{props.title}</p>
           <p style={styles.author}>{props.author}</p>
@@ -137,14 +142,20 @@ function BookCard(props) {
                 size={32}
                 onClick={handleClose}
               />
-              <div style={styles.modalImg}>Cover image</div>
+              <div style={styles.modalImg}>
+                <img
+                  src={props.book_cover_image}
+                  width="300"
+                  alt="Cover coming soon"
+                />
+              </div>
               <div style={styles.modalInfo}>
                 <h1>{props.title}</h1>
                 <p>Author: {props.author}</p>
                 {props.genre && <p>Genre: {props.genre}</p>}
                 {props.num_pages && <p>Number of pages: {props.num_pages}</p>}
                 {props.format && <p>Format: {props.format}</p>}
-                <p>Description of book</p>
+                {props.description && <p>{props.description}</p>}
                 <Link to={props.link}>
                   <Button buttonSize="btn--wide" buttonColor="blue">
                     Check Out

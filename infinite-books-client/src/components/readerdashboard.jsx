@@ -28,6 +28,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ReaderProfile from "./ReaderProfile";
 
 // MUI
 import InputLabel from "@material-ui/core/InputLabel";
@@ -67,11 +68,10 @@ const styles = {
     display: "flex",
     flexWrap: "wrap",
     height: 300,
-    width: 250,
-    border: "1px dashed gray",
+    width: 185,
+    border: "1px solid lightgray",
     margin: "0 auto",
     fontSize: 8,
-    paddingLeft: 50,
   },
   inputDiv: {
     display: "flex",
@@ -143,7 +143,12 @@ function ReaderDashboard(props) {
   const dropdownItems = [];
   books.forEach((bookObject) => {
     dropdownItems.push(
-      <MenuItem value={bookObject["book_uid"]}>{bookObject["title"]}</MenuItem>
+      <MenuItem
+        value={bookObject["book_cover_image"]}
+        key={bookObject["book_uid"]}
+      >
+        {bookObject["title"]}
+      </MenuItem>
     );
   });
 
@@ -191,9 +196,12 @@ function ReaderDashboard(props) {
 
   // bool for handling conditional render
   const [bookIsSelected, setBookIsSelected] = useState(false);
+  const [bookCoverUrl, setBookCoverUrl] = useState(false);
   const handleSelect = (e) => {
-    const newBookUid = e.target.value;
+    const newBookUid = e.target.key;
+    const newBookCoverUrl = e.target.value;
     setBookUid(newBookUid);
+    setBookCoverUrl(newBookCoverUrl);
   };
 
   // tracks state of bookuid to re-render after dropdown selection
@@ -207,39 +215,87 @@ function ReaderDashboard(props) {
   }, [bookUid]);
 
   return (
-    <div>
-      {/* outmost container */}
-      <Grid
-        container
-        direction="row"
-        justify="center"
-        alignItems="center"
-        style={styles.container}
-      >
-        {/* Left inner div containing dropdown and book cover image */}
-        <Paper elevation={3} style={styles.dropdownDiv}>
-          <FormControl style={styles.FormControl}>
-            <InputLabel style={styles.InputLabel}>Book title</InputLabel>
-            <Select value={bookUid} onChange={handleSelect}>
-              <MenuItem value="">
-                <em>Select a Book...</em>
-              </MenuItem>
-              {dropdownItems}
-            </Select>
-            <FormHelperText>Select a book</FormHelperText>
-          </FormControl>
+    <>
+      {/* <ReaderProfile /> */}
+      <div>
+        {/* outmost container */}
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="center"
+          style={styles.container}
+        >
+          {/* Left inner div containing dropdown and book cover image */}
+          <Paper elevation={3} style={styles.dropdownDiv}>
+            <FormControl style={styles.FormControl}>
+              <InputLabel style={styles.InputLabel}>Book title</InputLabel>
+              <Select value={bookUid} onChange={handleSelect}>
+                <MenuItem value="">
+                  <em>Select a Book...</em>
+                </MenuItem>
+                {dropdownItems}
+              </Select>
+              <FormHelperText>Select a book</FormHelperText>
+            </FormControl>
 
-          {bookIsSelected && (
-            <div style={styles.imgDiv}>
-              {bookUid} -- cover image coming soon
-            </div>
-          )}
-        </Paper>
+            {bookIsSelected && (
+              <div style={styles.imgDiv}>
+                <img
+                  src={bookCoverUrl}
+                  style={{ height: 300 }}
+                  alt="Cover coming soon"
+                />
+              </div>
+            )}
+          </Paper>
 
-        {/* Right inner div containing feedback forms */}
+          {/* Right inner div containing feedback forms */}
 
-        {bookIsSelected ? (
-          <Paper elevation={3} style={styles.inputDiv}>
+          {bookIsSelected ? (
+            <Paper elevation={3} style={styles.inputDiv}>
+              <Grid
+                container
+                direction="column"
+                justify="center"
+                alignItems="stretch"
+                style={styles.inputDiv}
+              >
+                <input
+                  name="rating_title"
+                  style={styles.input}
+                  value={post.rating_title}
+                  placeholder="rating_title"
+                  onChange={handleChange}
+                />
+
+                <input
+                  name="rating_content"
+                  style={styles.input}
+                  value={post.rating_content}
+                  placeholder="rating_content"
+                  onChange={handleChange}
+                />
+                <input
+                  name="comments"
+                  value={post.comments}
+                  rows={4}
+                  style={styles.input}
+                  placeholder="comments"
+                  onChange={handleChange}
+                />
+                <button
+                  name="submit"
+                  style={styles.input}
+                  className="btn btn-primary"
+                  value="/api/v2/InsertNewReview"
+                  onClick={sendPostArgs}
+                >
+                  Submit
+                </button>
+              </Grid>
+            </Paper>
+          ) : (
             <Grid
               container
               direction="column"
@@ -247,53 +303,12 @@ function ReaderDashboard(props) {
               alignItems="stretch"
               style={styles.inputDiv}
             >
-              <input
-                name="rating_title"
-                style={styles.input}
-                value={post.rating_title}
-                placeholder="rating_title"
-                onChange={handleChange}
-              />
-
-              <input
-                name="rating_content"
-                style={styles.input}
-                value={post.rating_content}
-                placeholder="rating_content"
-                onChange={handleChange}
-              />
-              <input
-                name="comments"
-                value={post.comments}
-                rows={4}
-                style={styles.input}
-                placeholder="comments"
-                onChange={handleChange}
-              />
-              <button
-                name="submit"
-                style={styles.input}
-                className="btn btn-primary"
-                value="/api/v2/InsertNewReview"
-                onClick={sendPostArgs}
-              >
-                Submit
-              </button>
+              Select a book from the dropdown to begin a review
             </Grid>
-          </Paper>
-        ) : (
-          <Grid
-            container
-            direction="column"
-            justify="center"
-            alignItems="stretch"
-            style={styles.inputDiv}
-          >
-            Select a book from the dropdown to begin a review
-          </Grid>
-        )}
-      </Grid>
-    </div>
+          )}
+        </Grid>
+      </div>
+    </>
   );
 }
 
