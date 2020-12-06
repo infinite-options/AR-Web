@@ -62,13 +62,13 @@ const styles = {
     marginRight: 5,
   },
   imgDiv: {
+    width: 219,
     textAlign: "center",
     alignItems: "center",
     alignContent: "center",
     display: "flex",
     flexWrap: "wrap",
-    height: 300,
-    width: 185,
+
     border: "1px solid lightgray",
     margin: "0 auto",
     fontSize: 8,
@@ -196,7 +196,7 @@ function ReaderDashboard(props) {
 
   // bool for handling conditional render
   const [bookIsSelected, setBookIsSelected] = useState(false);
-  const [bookCoverUrl, setBookCoverUrl] = useState(false);
+  const [bookCoverUrl, setBookCoverUrl] = useState();
   const handleSelect = (e) => {
     const newBookUid = e.target.key;
     const newBookCoverUrl = e.target.value;
@@ -243,7 +243,7 @@ function ReaderDashboard(props) {
               <div style={styles.imgDiv}>
                 <img
                   src={bookCoverUrl}
-                  style={{ height: 300 }}
+                  style={{ height: 350 }}
                   alt="Cover coming soon"
                 />
               </div>
