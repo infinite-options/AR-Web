@@ -9,7 +9,7 @@ import Navbar from "./components/navbar";
 import Footer from "./components/Footer";
 import Books from "./components/pages/Books/Books";
 import Signup from "./components/Signup";
-import Author from "./components/Author";
+import Author from "./components/author";
 
 const styles = {
   hr: {
