@@ -1,6 +1,8 @@
 // TODO:
 // error handling for email & password,
+// password should have some complexity constraint,
 // use redux to maintain app login state,
+// the inputs are ugly,
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -60,7 +62,13 @@ const styles = {
     height: 36,
     width: 74,
   },
-  input: {
+  inputLeft: {
+    width: "55%",
+    margin: 2,
+    padding: 5,
+    marginTop: 6,
+  },
+  inputRight: {
     width: "85%",
     margin: 2,
     padding: 5,
@@ -100,6 +108,12 @@ const styles = {
   InputLabel: {
     padding: 20,
   },
+  error: {
+    height: 6,
+    color: "red",
+    fontSize: 8,
+    textDecoration: "italic",
+  },
 };
 
 function Signup(props) {
@@ -109,6 +123,7 @@ function Signup(props) {
   const [post, setPost] = useState({
     email: "",
     password: "",
+    password2: "",
     username: "",
     pen_name: "",
     bio: "",
@@ -120,6 +135,7 @@ function Signup(props) {
     setPost({
       email: "",
       password: "",
+      password2: "",
       username: "",
       pen_name: "",
       bio: "",
@@ -128,15 +144,26 @@ function Signup(props) {
     });
   };
 
+  const clearErrors = () => {
+    setErrors({
+      ...errors,
+      ["email"]: "",
+      ["password"]: "",
+      ["password2"]: "",
+      ["username"]: "",
+    });
+  };
+
   function submitForm(e) {
     e.preventDefault();
     if (userRegistered) {
-      props.history.push("/"); // <--- The page you want to redirect your user to.
+      props.history.push("/"); // <--- The page you want to redirect your user to. (home page for now)
     }
   }
 
   // For text fields
   const handleChange = (e) => {
+    clearErrors();
     e.persist();
     setPost({ ...post, [e.target.name]: e.target.value });
     console.log(post);
@@ -145,79 +172,85 @@ function Signup(props) {
   const [userRegistered, setUserRegistered] = useState(false);
 
   const sendPostArgs = (e) => {
-    // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp
-    const post_url = url;
-    console.log(post_url);
-    let payload = {
-      /*
-      {
-   "username":"testing",
-   "first_name":"te",
-   "last_name":"st",
-   "pen_name":"name",
-   "bio":"bio",
-   "language":"en",
-   "likes_writing_about":"test",
-   "role":"testingrole",
-   "gender":"M",
-   "educationLevel":"test",
-   "age":"100",
-   "careerField":"test",
-   "income":"10000000000000000",
-   "email":"abcxyz@gmail.com",
-   "phone":"4084084088",
-   "interest":"good books",
-   "hours":"10",
-   "favorites":"fantasy",
-   "social":"FALSE",
-   "access_token":"NULL",
-   "refresh_token":"NULL",
-   "password":"1234"
-}
-      */
+    if (validate(post.email, post.password, post.password2, post.username)) {
+      // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp
+      const post_url = url;
+      console.log(post_url);
+      let payload = {
+        /*
+          {
+            "username":"testing",
+            "first_name":"te",
+            "last_name":"st",
+            "pen_name":"name",
+            "bio":"bio",
+            "language":"en",
+            "likes_writing_about":"test",
+            "role":"testingrole",
+            "gender":"M",
+            "educationLevel":"test",
+            "age":"100",
+            "careerField":"test",
+            "income":"10000000000000000",
+            "email":"abcxyz@gmail.com",
+            "phone":"4084084088",
+            "interest":"good books",
+            "hours":"10",
+            "favorites":"fantasy",
+            "social":"FALSE",
+            "access_token":"NULL",
+            "refresh_token":"NULL",
+            "password":"1234"
+          }
+        */
 
-      username: post.username,
-      first_name: "",
-      last_name: "",
-      pen_name: post.pen_name,
-      bio: post.bio,
-      language: post.language,
-      likes_writing_about: post.likes_writing_about,
-      role: selectedOption,
-      gender: gender,
-      educationLevel: educationLevel,
-      age: age,
-      careerField: careerField,
-      income: income,
-      email: post.email,
-      phone: "",
-      interest: "",
-      hours: "",
-      favorites: "",
-      social: "FALSE",
-      access_token: "NULL",
-      refresh_token: "NULL",
-      password: post.password,
-    };
-    console.log(payload);
-    axios
-      .post(post_url, payload)
-      .then((res) => {
-        console.log(res);
-        let arr = [{ message: res.data.message }];
-        console.log(arr);
-        if (res.data.code === "200") {
-          setUserRegistered(true);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-    clear();
+        username: post.username,
+        first_name: "",
+        last_name: "",
+        pen_name: post.pen_name,
+        bio: post.bio,
+        language: post.language,
+        likes_writing_about: post.likes_writing_about,
+        role: selectedOption,
+        gender: gender,
+        educationLevel: educationLevel,
+        age: age,
+        careerField: careerField,
+        income: income,
+        email: post.email,
+        phone: "",
+        interest: "",
+        hours: "",
+        favorites: "",
+        social: "FALSE",
+        access_token: "NULL",
+        refresh_token: "NULL",
+        password: post.password,
+      };
+      console.log(payload);
+      axios
+        .post(post_url, payload)
+        .then((res) => {
+          console.log(res);
+          let arr = [{ message: res.data.message }];
+          console.log(arr);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      clear();
+    }
   };
 
   const [selectedOption, setSelectedOption] = useState("");
   const [readerDivShown, setReaderDivShown] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    password2: "",
+    username: "",
+  });
+
   useEffect(() => {}, [selectedOption]);
 
   const createClickHandler = (label) => (e) => {
@@ -256,8 +289,63 @@ function Signup(props) {
     setIncome(e.target.value);
   };
 
-  const validatePassword = () => {
-    // todo
+  const validate = (email, password1, password2, username) => {
+    let noErrors = true;
+    if (typeof email !== "undefined") {
+      var pattern = new RegExp(
+        /^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i
+      );
+      if (!pattern.test(post.email)) {
+        setErrors({
+          ...errors,
+          ["email"]: "Please enter valid email address.",
+        });
+        noErrors = false;
+      }
+      if (email === "") {
+        setErrors({
+          ...errors,
+          ["email"]: "This is a required field.",
+        });
+        noErrors = false;
+      }
+    }
+    if (typeof password1 !== "undefined") {
+      if (password1 !== password2) {
+        setErrors({
+          ...errors,
+          ["password"]: "Passwords must match.",
+        });
+        noErrors = false;
+      }
+      if (password1 === "") {
+        setErrors({
+          ...errors,
+          ["password"]: "This is a required field.",
+        });
+        noErrors = false;
+      }
+      if (password2 === "") {
+        setErrors({
+          ...errors,
+          ["password2"]: "This is a required field.",
+        });
+        noErrors = false;
+      }
+    }
+    if (typeof username !== "undefined") {
+      if (username === "") {
+        setErrors({
+          ...errors,
+          ["username"]: "This is a required field.",
+        });
+        noErrors = false;
+      }
+    }
+    if (noErrors) {
+      setUserRegistered(true);
+    }
+    return noErrors;
   };
 
   const genders = ["Male", "Female", "Non-binary/Other", "Prefer not to say"];
@@ -402,7 +490,7 @@ function Signup(props) {
         </Typography>
         <input
           name="pen_name"
-          style={styles.input}
+          style={styles.inputRight}
           autoComplete="off"
           value={post.pen_name}
           placeholder="Your pen name"
@@ -411,7 +499,7 @@ function Signup(props) {
         <textarea
           name="bio"
           rows="3"
-          style={styles.input}
+          style={styles.inputRight}
           autoComplete="off"
           value={post.bio}
           placeholder="Bio"
@@ -419,7 +507,7 @@ function Signup(props) {
         />
         <input
           name="language"
-          style={styles.input}
+          style={styles.inputRight}
           autoComplete="off"
           value={post.language}
           placeholder="Language you write in"
@@ -427,7 +515,7 @@ function Signup(props) {
         />
         <input
           name="likes_writing_about"
-          style={styles.input}
+          style={styles.inputRight}
           autoComplete="off"
           value={post.likes_writing_about}
           placeholder="What do you like writing about?"
@@ -516,34 +604,38 @@ function Signup(props) {
         >
           <Paper elevation={3} style={styles.inputDiv}>
             <div style={styles.emailSignIn}>
+              <div style={styles.error}>{errors["email"]}</div>
               <input
                 name="email"
                 type="email"
-                style={styles.input}
+                style={styles.inputLeft}
                 value={post.email}
                 placeholder="Email Address"
                 onChange={handleChange}
               />
+              <div style={styles.error}>{errors["password"]}</div>
               <input
                 name="password"
                 type="password"
-                style={styles.input}
+                style={styles.inputLeft}
                 value={post.password}
                 placeholder="Password"
                 onChange={handleChange}
               />
+              <div style={styles.error}>{errors["password2"]}</div>
               <input
-                name="confirmPassword"
+                name="password2"
                 type="password"
-                style={styles.input}
-                // value={post.password}
+                style={styles.inputLeft}
+                value={post.password2}
                 placeholder="Confirm Password"
                 onChange={handleChange}
               />
+              <div style={styles.error}>{errors["username"]}</div>
               <input
                 name="username"
-                style={styles.input}
-                // value={post.password}
+                style={styles.inputLeft}
+                value={post.username}
                 placeholder="What should we call you?"
                 onChange={handleChange}
               />

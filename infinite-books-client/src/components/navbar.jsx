@@ -1,3 +1,5 @@
+// TODO: redirect after login
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./Button";
@@ -82,10 +84,9 @@ function NavBar(props) {
   const [click, setClick] = useState(false);
   const [button, setButton] = useState(true);
   const [emailValue, setEmail] = useState("");
-	const [passwordValue, setPassword] = useState("");
-	// const [errorValue, setError] = useState(false);
-	// const [error, RaiseError] = useState(null);
-
+  const [passwordValue, setPassword] = useState("");
+  // const [errorValue, setError] = useState(false);
+  // const [error, RaiseError] = useState(null);
 
   const handleClick = () => {
     setClick(!click);
@@ -108,8 +109,6 @@ function NavBar(props) {
   };
 
   window.addEventListener("resize", showButton);
-
-
 
   const handleOpen = () => {
     setOpen(true);
@@ -136,14 +135,14 @@ function NavBar(props) {
 
   const handleEmailChange = (e) => {
     // console.log('email is changing')
-    setEmail(e.target.value)
-}
-const handlePasswordChange = (e) => {
+    setEmail(e.target.value);
+  };
+  const handlePasswordChange = (e) => {
     // console.log('password is changing')
-    setPassword(e.target.value)
-}
+    setPassword(e.target.value);
+  };
 
-  // code lifted from 
+  // code lifted from
   // https://github.com/infinite-options/serving-fresh-react-admin/blob/master/src/admin/AdminLogin.js
   const verifyLoginInfo = (e) => {
     // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/AccountSalt
@@ -152,128 +151,130 @@ const handlePasswordChange = (e) => {
     };
     console.log(payload);
     axios
-    .post(API_URL + 'AccountSalt', payload)
-    .then((res) => {
+      .post(API_URL + "AccountSalt", payload)
+      .then((res) => {
+        let saltObject = res;
 
-      let saltObject = res;
-     
-      if(!(saltObject.data.code && saltObject.data.code !== 280)) {
+        if (!(saltObject.data.code && saltObject.data.code !== 280)) {
           let hashAlg = saltObject.data.result[0].password_algorithm;
           let salt = saltObject.data.result[0].password_salt;
-        
+
           if (hashAlg != null && salt != null) {
-              // Make sure the data exists
-              if(hashAlg !== '' && salt !== '') {
-                  // Rename hash algorithm so client can understand
-                  switch(hashAlg) {
-                      case 'SHA512':
-                          hashAlg = 'SHA-512';
-                          break;
-                      default:
-                          break;
-                  }
+            // Make sure the data exists
+            if (hashAlg !== "" && salt !== "") {
+              // Rename hash algorithm so client can understand
+              switch (hashAlg) {
+                case "SHA512":
+                  hashAlg = "SHA-512";
+                  break;
+                default:
+                  break;
+              }
 
-                  // Salt plain text password
-                  let saltedPassword = passwordValue + salt;
+              // Salt plain text password
+              let saltedPassword = passwordValue + salt;
 
-                  // Encode salted password to prepare for hashing
-                  const encoder = new TextEncoder();
-                  const data = encoder.encode(saltedPassword);
-                  //Hash salted password
-                  crypto.subtle.digest(hashAlg,data)
-                  .then((res) => {
-                      let hash = res;
-                      // Decode hash with hex digest
-                      let hashArray = Array.from(new Uint8Array(hash));
-                      let hashedPassword = hashArray.map(byte => { return byte.toString(16).padStart(2, '0')}).join('');
-
-                      let loginObject = {
-                          email: emailValue,
-                          password: hashedPassword,
-                          social_id: '',
-                          signup_platform: ''
-                      }
-
-                      axios
-                      .post(API_URL + 'Login', loginObject,{
-                          headers: {
-                              'Content-Type': 'text/plain'
-                          }
-                      })
-                      .then((res) => {
-                          console.log(res)
-                          if(res.data.code === 200) {
-                              console.log('Login success')
-                              let userInfo = res.data.result[0];
-                              document.cookie = 'user_uid=' + userInfo.user_uid;
-                              Cookies.set("login-session", "good");
-
-                          } else if (res.data.code === 406 || res.data.code === 404){
-                              console.log('Invalid credentials.')
-                          } else if (res.data.code === 401) {
-                              console.log('Need to log in by social media.')
-                          } else {
-                              console.log('Unknown login error, please try again later.')
-                          }
-                      })
-                      .catch((err) => {
-                          // Log error for Login endpoint
-                          if(err.response) {
-                              console.log(err.response);
-                          }
-                          console.log(err);
-                      })
+              // Encode salted password to prepare for hashing
+              const encoder = new TextEncoder();
+              const data = encoder.encode(saltedPassword);
+              //Hash salted password
+              crypto.subtle.digest(hashAlg, data).then((res) => {
+                let hash = res;
+                // Decode hash with hex digest
+                let hashArray = Array.from(new Uint8Array(hash));
+                let hashedPassword = hashArray
+                  .map((byte) => {
+                    return byte.toString(16).padStart(2, "0");
                   })
-              }
-          } else {
-              // No hash/salt information, probably need to sign in by socail media
-              console.log('Salt not found')
-              // Try to login anyway to confirm
-              let loginObject = {
-                  email: emailValue,
-                  password: 'test',
-                  token: '',
-                  signup_platform: ''
-              }
+                  .join("");
 
-              axios
-              .post(API_URL + 'Login', loginObject,{
-                  headers: {
-                      'Content-Type': 'text/plain'
-                  }
+                let loginObject = {
+                  email: emailValue,
+                  password: hashedPassword,
+                  social_id: "",
+                  signup_platform: "",
+                };
+
+                axios
+                  .post(API_URL + "Login", loginObject, {
+                    headers: {
+                      "Content-Type": "text/plain",
+                    },
+                  })
+                  .then((res) => {
+                    console.log(res);
+                    if (res.data.code === 200) {
+                      console.log("Login success");
+                      let userInfo = res.data.result[0];
+                      document.cookie = "user_uid=" + userInfo.user_uid;
+                      Cookies.set("login-session", "good");
+                    } else if (res.data.code === 406 || res.data.code === 404) {
+                      console.log("Invalid credentials.");
+                    } else if (res.data.code === 401) {
+                      console.log("Need to log in by social media.");
+                    } else {
+                      console.log(
+                        "Unknown login error, please try again later."
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    // Log error for Login endpoint
+                    if (err.response) {
+                      console.log(err.response);
+                    }
+                    console.log(err);
+                  });
+              });
+            }
+          } else {
+            // No hash/salt information, probably need to sign in by socail media
+            console.log("Salt not found");
+            // Try to login anyway to confirm
+            let loginObject = {
+              email: emailValue,
+              password: "test",
+              token: "",
+              signup_platform: "",
+            };
+
+            axios
+              .post(API_URL + "Login", loginObject, {
+                headers: {
+                  "Content-Type": "text/plain",
+                },
               })
               .then((res) => {
-                  console.log(res)
-                  if (res.data.code === 401) {
-                      console.log('Need to log in by social media')
-                  } else {
-                      console.log('Unknown login error')
-                  }
+                console.log(res);
+                if (res.data.code === 401) {
+                  console.log("Need to log in by social media");
+                } else {
+                  console.log("Unknown login error");
+                }
               })
               .catch((err) => {
-                  // Log error for Login endpoint
-                  if(err.response) {
-                      console.log(err.response);
-                  }
-                  console.log(err);
-              })
+                // Log error for Login endpoint
+                if (err.response) {
+                  console.log(err.response);
+                }
+                console.log(err);
+              });
           }
-      } else {
+        } else {
           // No information, probably because invalid email
-          console.log('Invalid credentials')
-      }
-  })
-  .catch((err) => {
-      // Log error for account salt endpoint
-      if(err.response) {
-          console.log(err.response)
-      }
-      console.log(err);
-  })
+          console.log("Invalid credentials");
+        }
+      })
+      .catch((err) => {
+        // Log error for account salt endpoint
+        if (err.response) {
+          console.log(err.response);
+        }
+        console.log(err);
+      });
     clear();
   };
 
-  
   return (
     <>
       <IconContext.Provider value={{ color: "#309aac" }}>
