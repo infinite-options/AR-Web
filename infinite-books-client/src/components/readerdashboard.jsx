@@ -28,7 +28,8 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ReaderProfile from "./ReaderProfile";
+import ReadingPane from "./ReadingPane";
+import samplePdf from "./sample.pdf";
 
 // MUI
 import InputLabel from "@material-ui/core/InputLabel";
@@ -216,6 +217,7 @@ function ReaderDashboard(props) {
 
   return (
     <>
+      <ReadingPane pdf={samplePdf} />
       {/* <ReaderProfile /> */}
       <div>
         {/* outmost container */}

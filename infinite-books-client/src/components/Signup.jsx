@@ -131,6 +131,11 @@ function Signup(props) {
     likes_writing_about: "",
   });
 
+  // When directed to this page from a link, returns to top of page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const clear = () => {
     setPost({
       email: "",
