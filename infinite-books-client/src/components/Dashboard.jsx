@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import FeaturedBook from "./FeaturedBook";
-import { bookObjOne } from "./FeaturedBookData";
-import BookCard from "./BookCard";
+import Emoji from "./Emoji";
+import BookCard from "./pages/Books/BookCard";
+import { Route, BrowserRouter } from "react-router-dom";
+import ReadingPane from "./ReadingPane";
+import samplePdf from "./BalancingAct.pdf";
 
 const styles = {
   container: {
@@ -23,9 +25,14 @@ const styles = {
     background: "#a7dee8",
     height: "1px",
   },
+  welcomeMessage: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 };
 
-function Books(props) {
+function Dashboard(props) {
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
   const [books, setBooks] = useState([]);
 
@@ -41,11 +48,11 @@ function Books(props) {
   const getAllBooks = () => {
     // Fetches books from db
     const AllBooksUrl = url + "/api/v2/AuthorForEachBook";
-    //console.log(AllBooksUrl);
+    console.log(AllBooksUrl);
     axios
       .get(AllBooksUrl)
       .then((res) => {
-        //console.log(res);
+        console.log(res);
         setBooks(res.data.result);
       })
       .catch((err) => {
@@ -53,12 +60,12 @@ function Books(props) {
       });
   };
 
-  const bookCards = books.map((bookObject, index) => {
-    return (
+  const bookCards = [];
+  books.forEach((bookObject) => {
+    bookCards.push(
       <BookCard
-        key={index}
-        variant={"preview"}
-        book_uid={bookObject["book_uid"]}
+        key={bookObject["book_uid"]}
+        variant={"readable"}
         title={bookObject["title"]}
         author={bookObject["author"]}
         genre={bookObject["genre"]}
@@ -73,11 +80,15 @@ function Books(props) {
 
   return (
     <>
-      <FeaturedBook {...bookObjOne} />
+      <div style={styles.welcomeMessage}>
+        Hello, $Username! <Emoji symbol="👋" label="waving" />
+        Here is your library, where the books you've checked out will appear.{" "}
+        <Emoji symbol="📚" label="books" />
+      </div>
       <hr style={styles.hr} />
       <div style={styles.container}>{bookCards}</div>
     </>
   );
 }
 
-export default Books;
+export default Dashboard;

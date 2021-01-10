@@ -224,3 +224,101 @@ Card: {
             </Grid>
           </Grid>
         </Grid>
+
+
+        ___________________________________________________________________________________
+
+        
+
+      {/* <ReaderProfile /> */}
+      <div>
+        {/* outmost container */}
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="center"
+          style={styles.container}
+        >
+          {/* Left inner div containing dropdown and book cover image */}
+          <Paper elevation={3} style={styles.dropdownDiv}>
+            <FormControl style={styles.FormControl}>
+              <InputLabel style={styles.InputLabel}>Book title</InputLabel>
+              <Select value={bookUid} onChange={handleSelect}>
+                <MenuItem value="">
+                  <em>Select a Book...</em>
+                </MenuItem>
+                {dropdownItems}
+              </Select>
+              <FormHelperText>Select a book</FormHelperText>
+            </FormControl>
+
+            {bookIsSelected && (
+              <div style={styles.imgDiv}>
+                <img
+                  src={bookCoverUrl}
+                  style={{ height: 350 }}
+                  alt="Cover coming soon"
+                />
+              </div>
+            )}
+          </Paper>
+
+          {/* Right inner div containing feedback forms */}
+
+          {bookIsSelected ? (
+            <Paper elevation={3} style={styles.inputsDiv}>
+              <Grid
+                container
+                direction="column"
+                justify="center"
+                alignItems="stretch"
+                style={styles.inputsDiv}
+              >
+                <input
+                  name="rating_title"
+                  style={styles.input}
+                  value={post.rating_title}
+                  placeholder="rating_title"
+                  onChange={handleChange}
+                />
+
+                <input
+                  name="rating_content"
+                  style={styles.input}
+                  value={post.rating_content}
+                  placeholder="rating_content"
+                  onChange={handleChange}
+                />
+                <input
+                  name="comments"
+                  value={post.comments}
+                  rows={4}
+                  style={styles.input}
+                  placeholder="comments"
+                  onChange={handleChange}
+                />
+                <button
+                  name="submit"
+                  style={styles.input}
+                  className="btn btn-primary"
+                  value="/api/v2/InsertNewReview"
+                  onClick={sendPostArgs}
+                >
+                  Submit
+                </button>
+              </Grid>
+            </Paper>
+          ) : (
+            <Grid
+              container
+              direction="column"
+              justify="center"
+              alignItems="stretch"
+              style={styles.inputsDiv}
+            >
+              Select a book from the dropdown to begin a review
+            </Grid>
+          )}
+        </Grid>
+      </div>

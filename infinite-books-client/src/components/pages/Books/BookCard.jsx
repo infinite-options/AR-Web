@@ -59,8 +59,8 @@ const styles = {
   modalContainer: {
     //height: "50vh",
     //width: "90vh",
-    height: 500,
-    width: 800,
+    height: "auto",
+    width: 820,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -108,6 +108,32 @@ function BookCard(props) {
   const handleClose = () => {
     setOpen(false);
   };
+
+  let button;
+  if (props.variant === "preview") {
+    button = (
+      <Button buttonSize="btn--wide" buttonColor="blue">
+        Check Out
+      </Button>
+    );
+  } else if (props.variant === "readable") {
+    button = (
+      <>
+        <Link to={{ pathname: "/readingpane", pdf: props.book_link }}>
+          <Button buttonSize="btn--wide" buttonColor="blue">
+            Start Reading
+          </Button>
+        </Link>
+      </>
+    );
+  } else {
+    button = (
+      <Button buttonSize="btn--wide" buttonColor="blue">
+        Check Out
+      </Button>
+    );
+  }
+
   return (
     <React.Fragment>
       <Paper elevation={2} style={styles.cardContainer} onClick={handleOpen}>
@@ -156,11 +182,7 @@ function BookCard(props) {
                 {props.num_pages && <p>Number of pages: {props.num_pages}</p>}
                 {props.format && <p>Format: {props.format}</p>}
                 {props.description && <p>{props.description}</p>}
-                <Link to={props.link}>
-                  <Button buttonSize="btn--wide" buttonColor="blue">
-                    Check Out
-                  </Button>
-                </Link>
+                {button}
               </div>
             </div>
           </Paper>

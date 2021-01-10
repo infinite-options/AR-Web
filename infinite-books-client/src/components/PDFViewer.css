@@ -23,8 +23,10 @@
   overflow: auto;
 }
 
-button {
-  margin-right: 10px;
+.button-large {
+  justify-content: center;
+  align-items: center;
+  margin: 3px;
   background: #309aac;
   color: white;
   border: none;
@@ -32,15 +34,40 @@ button {
   width: 100px;
   cursor: pointer;
   box-shadow: 2px 2px 2px 1px #ccc;
+  border: 1px solid #0e7a8d;
 }
-button:hover {
+.button-large:hover {
   border: 1px solid #0099cc;
   background-color: #00aacc;
   color: #ffffff;
 }
 
-button:disabled,
-button[disabled] {
+.button-large:disabled,
+.button-large[disabled] {
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
+
+.button-small {
+  margin: 3px;
+  background: #309aac;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  width: 50px;
+  cursor: pointer;
+  box-shadow: 2px 2px 2px 1px #ccc;
+  border: 1px solid #0e7a8d;
+}
+.button-small:hover {
+  border: 1px solid #0099cc;
+  background-color: #00aacc;
+  color: #ffffff;
+}
+
+.button-small:disabled,
+.button-small[disabled] {
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #666666;

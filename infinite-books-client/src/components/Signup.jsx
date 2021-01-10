@@ -171,7 +171,7 @@ function Signup(props) {
     clearErrors();
     e.persist();
     setPost({ ...post, [e.target.name]: e.target.value });
-    console.log(post);
+    //console.log(post);
   };
 
   const [userRegistered, setUserRegistered] = useState(false);
@@ -180,7 +180,7 @@ function Signup(props) {
     if (validate(post.email, post.password, post.password2, post.username)) {
       // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp
       const post_url = url;
-      console.log(post_url);
+      //console.log(post_url);
       let payload = {
         /*
           {
@@ -238,7 +238,7 @@ function Signup(props) {
         .then((res) => {
           console.log(res);
           let arr = [{ message: res.data.message }];
-          console.log(arr);
+          //console.log(arr);
         })
         .catch((err) => {
           console.error(err);
@@ -366,13 +366,13 @@ function Signup(props) {
   ];
 
   const educationLevels = [
-    "Less than high school",
-    "High school diploma or equivalent",
-    "Some college, no degree",
-    "Associate's degree",
-    "Bachelor's degree",
-    "Master's degree",
-    "Doctoral or professional degree",
+    { display: "Less than high school", value: "less than high school" },
+    { display: "High school diploma or equivalent", value: "high school" },
+    { display: "Some college, no degree", value: "some college no degree" },
+    { display: "Associate's degree", value: "associates" },
+    { display: "Bachelor's degree", value: "bachelors" },
+    { display: "Master's degree", value: "masters" },
+    { display: "Doctoral or professional degree", value: "doctorate or phd" },
   ];
 
   const careerFields = [
@@ -444,8 +444,8 @@ function Signup(props) {
           <InputLabel style={styles.InputLabel}>Education level</InputLabel>
           <Select value={educationLevel} onChange={handleEducationSelect}>
             {educationLevels.map((levelOption, index) => (
-              <MenuItem key={index} value={levelOption}>
-                {levelOption}
+              <MenuItem key={index} value={levelOption.value}>
+                {levelOption.display}
               </MenuItem>
             ))}
           </Select>
