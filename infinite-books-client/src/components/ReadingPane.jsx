@@ -22,7 +22,6 @@ function ReaderDashboard(props) {
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
   //const [result, setResult] = useState([]);
 
-  const [bookUid, setBookUid] = useState("200-000001"); // TODO: remove default
   const [post, setPost] = useState({
     rev_book_uid: "",
     reader_id: "",
@@ -69,7 +68,7 @@ function ReaderDashboard(props) {
           "page_num":"10"
       }
       */
-      rev_book_uid: bookUid,
+      rev_book_uid: props.location.book_uid,
       reader_id: "100-000002", // TODO: get reader id from login credentials
       comments: post.comments,
       rating_title: post.rating_title,
@@ -91,6 +90,7 @@ function ReaderDashboard(props) {
   };
 
   useEffect(() => {
+    console.log(props);
     window.scrollTo(0, 0);
   }, []);
 

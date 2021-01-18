@@ -119,7 +119,13 @@ function BookCard(props) {
   } else if (props.variant === "readable") {
     button = (
       <>
-        <Link to={{ pathname: "/readingpane", pdf: props.book_link }}>
+        <Link
+          to={{
+            pathname: "/readingpane",
+            pdf: props.book_link,
+            book_uid: props.book_uid,
+          }}
+        >
           <Button buttonSize="btn--wide" buttonColor="blue">
             Start Reading
           </Button>
@@ -133,6 +139,8 @@ function BookCard(props) {
       </Button>
     );
   }
+
+  console.log(props);
 
   return (
     <React.Fragment>
