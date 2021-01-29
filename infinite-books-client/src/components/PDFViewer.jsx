@@ -70,7 +70,7 @@ export default function PDFViewer(props) {
   useEffect(() => {
     // When the pageNumber changes, update the component and send the new value to readingpane.
     props.pgNumCallback(pageNumber);
-  }, [pageNumber]);
+  }, [pageNumber, props]);
 
   const { pdf } = props;
 

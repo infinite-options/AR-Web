@@ -140,8 +140,6 @@ function BookCard(props) {
     );
   }
 
-  console.log(props);
-
   return (
     <React.Fragment>
       <Paper elevation={2} style={styles.cardContainer} onClick={handleOpen}>

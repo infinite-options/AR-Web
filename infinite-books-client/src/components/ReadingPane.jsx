@@ -92,7 +92,7 @@ function ReaderDashboard(props) {
   useEffect(() => {
     console.log(props);
     window.scrollTo(0, 0);
-  }, []);
+  }, [props]);
 
   return (
     <>

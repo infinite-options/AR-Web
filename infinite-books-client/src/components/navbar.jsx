@@ -100,6 +100,7 @@ function NavBar(props) {
   };
 
   const closeMobileMenu = () => setClick(false);
+
   const showButton = () => {
     if (window.innerWidth <= 960) {
       setButton(false);
@@ -308,7 +309,7 @@ function NavBar(props) {
                   Readers
                 </Link>
               </li>
-              <li className="nav-item" onClick={closeMobileMenu}>
+              {/* <li className="nav-item" onClick={closeMobileMenu}>
                 <Link to="/forum" className="nav-links">
                   Forum
                 </Link>
@@ -317,7 +318,7 @@ function NavBar(props) {
                 <Link to="/about" className="nav-links">
                   About
                 </Link>
-              </li>
+              </li> */}
               <li className="nav-btn" onClick={closeMobileMenu}>
                 {button ? (
                   <Button

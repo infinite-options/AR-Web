@@ -1,15 +1,10 @@
 // TODO: change AllBooksUrl to only retrieve books by the logged in author
 
-import { Grid, Paper, Typography } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import AuthorReviewBookSelector from "./AuthorReviewBookSelector";
-
-const styles = {
-  Paper: {
-    padding: 10,
-  },
-};
+import AuthorBookSelector from "./AuthorBookSelector";
+import AddBook from "./AddBook";
 
 const AuthorDashboard = () => {
   useEffect(() => {
@@ -79,11 +74,8 @@ const AuthorDashboard = () => {
 
   return (
     <Grid container>
-      <AuthorReviewBookSelector
-        books={books}
-        reviews={reviews}
-        stats={authorStats}
-      />
+      <AddBook />
+      <AuthorBookSelector books={books} reviews={reviews} stats={authorStats} />
     </Grid>
   );
 };
