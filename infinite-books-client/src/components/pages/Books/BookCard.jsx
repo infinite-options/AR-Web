@@ -134,11 +134,37 @@ function BookCard(props) {
     );
   } else {
     button = (
-      <Button buttonSize="btn--wide" buttonColor="blue">
+      <Button
+        buttonSize="btn--wide"
+        buttonColor="blue"
+        onClick={handleCheckout}
+      >
         Check Out
       </Button>
     );
   }
+
+  /*
+  Checkout process: add new row to reviews table where user uid = review uid
+  */
+  const handleCheckout = () => {
+    console.log("You clicked me :)");
+    // let post_url = "";
+
+    // let payload = {};
+
+    // console.log(payload);
+    // axios
+    //   .post(post_url, payload)
+    //   .then((res) => {
+    //     console.log(res);
+    //     let arr = [{ message: res.data.message }];
+    //     console.log(arr);
+    //   })
+    //   .catch((err) => {
+    //     console.error(err);
+    //   });
+  };
 
   return (
     <React.Fragment>

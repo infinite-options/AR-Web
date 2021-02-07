@@ -58,7 +58,7 @@ function FeaturedBook({
                   {description}
                 </p>
                 {/* TODO: link to this book or login page */}
-                <Link to="/sign-up">
+                <Link to="/">
                   <Button buttonSize="btn--wide" buttonColor="blue">
                     {buttonLabel}
                   </Button>

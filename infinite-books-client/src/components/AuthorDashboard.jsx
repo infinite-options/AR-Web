@@ -1,15 +1,21 @@
-// TODO: change AllBooksUrl to only retrieve books by the logged in author
+// TODO: change booksUrl to only retrieve books by the logged in author
 
 import { Grid } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AuthorBookSelector from "./AuthorBookSelector";
 import AddBook from "./AddBook";
+// Getting user UID from cookies, maybe should get it from AuthContext?
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 const AuthorDashboard = () => {
   useEffect(() => {
     getBooksByAuthorUID();
   }, []);
+
+  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
 
   const [books, setBooks] = useState([]);
 
@@ -29,14 +35,14 @@ const AuthorDashboard = () => {
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
 
   const getBooksByAuthorUID = () => {
-    const allBooksUrl = url + "/api/v2/BooksByAuthorUID/100-000001";
+    const booksUrl = url + "/api/v2/BooksByAuthorUID/" + uid;
     const reviewByBookUidUrl = url + "/api/v2/ReviewByBookUID/";
-    console.log(allBooksUrl);
+    console.log(booksUrl);
     // Gets books by author UID
     axios
-      .get(allBooksUrl)
+      .get(booksUrl)
       .then((res) => {
-        // console.log(res.data.result);
+        console.log(res.data.result);
         setBooks(res.data.result);
         let bookUidArray = [];
         // Maps each bookUid to a URL in order to generate more get requests

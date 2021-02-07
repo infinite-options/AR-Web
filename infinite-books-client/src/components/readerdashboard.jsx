@@ -1,5 +1,6 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../AuthContext";
 import Emoji from "./Emoji";
 import BookCard from "./pages/Books/BookCard";
 
@@ -30,12 +31,14 @@ const styles = {
 };
 
 function Dashboard(props) {
+  const Auth = useContext(AuthContext);
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
   const [books, setBooks] = useState([]);
 
   // Emulates componentDidMount -> loads books from db on component load
   useEffect(
     () => {
+      console.log(Auth.username);
       getAllBooks();
     },
     // pass an array as an optional second argument to avoid infinite loop
@@ -45,11 +48,11 @@ function Dashboard(props) {
   const getAllBooks = () => {
     // Fetches books from db
     const AllBooksUrl = url + "/api/v2/AllBooks";
-    console.log(AllBooksUrl);
+    //console.log(AllBooksUrl);
     axios
       .get(AllBooksUrl)
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         setBooks(res.data.result);
       })
       .catch((err) => {
@@ -57,7 +60,7 @@ function Dashboard(props) {
       });
   };
 
-  console.log(books);
+  //console.log(books);
   const bookCards = [];
   books.forEach((bookObject) => {
     bookCards.push(
@@ -80,7 +83,7 @@ function Dashboard(props) {
   return (
     <>
       <div style={styles.welcomeMessage}>
-        Hello, $Username! <Emoji symbol="👋" label="waving" />
+        Hello, {Auth.username}! <Emoji symbol="👋" label="waving" />
         Here is your library, where the books you've checked out will appear.{" "}
         <Emoji symbol="📚" label="books" />
       </div>

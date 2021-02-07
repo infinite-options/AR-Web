@@ -1,5 +1,7 @@
 /* TODO: 
 - long reviews should overflow
+- re-do dropdown.
+- Re-render after adding a new book
 */
 
 import React, { useState, useEffect } from "react";
@@ -150,6 +152,7 @@ const AuthorBookSelector = (props) => {
   const [selectedBook, setSelectedBook] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
   useEffect(() => {}, [selectedBook, props]);
 
   const handleSelect = (e) => {
@@ -480,6 +483,15 @@ const AuthorBookSelector = (props) => {
     setEditMode(!editMode);
   };
 
+  const noBooksToDisplay = () => {
+    return (
+      <Typography variant={"subtitle2"}>
+        You don't currently have any books published. When you're ready, publish
+        a new book and you'll see your stats and reviews here.
+      </Typography>
+    );
+  };
+
   /* TODO: after implementing book edit functionality -> see example in AddBook.js
 
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -529,8 +541,14 @@ const AuthorBookSelector = (props) => {
     <Grid container spacing={1} className={classes.gridContainer}>
       <Grid item md={5} className={classes.gridDropdown}>
         <Paper className={classes.paper}>
-          <div style={{ padding: 15 }}>{dropdownMenu(props)}</div>
-          <div className={classes.bookDisplay}>{bookDisplay()}</div>
+          {props.books.length === 0 ? (
+            noBooksToDisplay()
+          ) : (
+            <div>
+              <div style={{ padding: 15 }}>{dropdownMenu(props)}</div>
+              <div className={classes.bookDisplay}>{bookDisplay()}</div>
+            </div>
+          )}
         </Paper>
       </Grid>
 

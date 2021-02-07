@@ -1,7 +1,6 @@
-// TODO: display image preview
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Cookies from "universal-cookie";
 
 // MUI
 import { Grid, Paper, Button } from "@material-ui/core";
@@ -17,6 +16,8 @@ import MuiAlert from "@material-ui/lab/Alert";
 import { IconContext } from "react-icons/lib";
 import { FaPlusSquare } from "react-icons/fa";
 import { AiFillCloseSquare } from "react-icons/ai";
+
+const cookies = new Cookies();
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -57,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
     width: "20%",
     flex: 1,
     height: "90%",
-    width: "auto",
     float: "left",
   },
   modalImageDiv: {
@@ -92,13 +92,15 @@ function Alert(props) {
 
 const AddBook = (props) => {
   const classes = useStyles();
+  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
   const [openModal, setOpenModal] = React.useState(false);
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [status, setStatus] = React.useState("");
   const [tempImgFile, setTempImgFile] = useState("");
-  const [base64File, setBase64File] = useState("");
+  //const [base64File, setBase64File] = useState("");
+  const [file, setFile] = useState({ obj: undefined, url: "" });
 
-  useEffect(() => {}, [base64File]);
+  useEffect(() => {}, [file]);
 
   const handleOpenSnackbar = (event, reason) => {
     if (reason === "clickaway") {
@@ -145,7 +147,7 @@ const AddBook = (props) => {
     /*
         {
             "title":"test",
-            "book_cover_image":"needs to be base64 string",
+            "book_cover_image":"",
             "author_uid":"100-000002",
             "genre":"None",
             "num_pages":"10000000000",
@@ -155,10 +157,10 @@ const AddBook = (props) => {
         }
     */
 
-    let payload = {
+    let bookInfo = {
       title: post.title,
-      book_cover_image: base64File, // TODO
-      author_uid: "100-000001", // TODO -> only currently logged in user
+      book_cover_image: file.obj, // TODO
+      author_uid: uid,
       genre: post.genre,
       num_pages: "", // determined dynamically when PDF loads
       description: post.description,
@@ -166,42 +168,52 @@ const AddBook = (props) => {
       book_link: "", // TODO
     };
 
-    console.log(payload);
+    let formData = new FormData();
+    Object.entries(bookInfo).forEach((entry) => {
+      formData.append(entry[0], entry[1]);
+    });
+
+    // for (var key of formData.entries()) {
+    //   console.log(key[0] + ", " + key[1]);
+    // }
+
     axios
-      .post(post_url, payload)
+      .post(post_url, formData)
       .then((res) => {
         console.log(res);
         let arr = [{ message: res.data.message }];
         console.log(arr);
         setStatus(res.status);
-        handleOpenSnackbar();
       })
       .catch((err) => {
         console.error(err);
       });
+    handleOpenSnackbar();
+    clear();
     handleCloseModal();
   };
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
-
     setTempImgFile(URL.createObjectURL(file));
-    const base64 = await convertBase64(file);
-    setBase64File(base64.slice(23));
+    setFile({ obj: file, url: URL.createObjectURL(file) });
+
+    //const base64 = await convertBase64(file);
+    //setBase64File(base64.slice(23))
   };
 
-  const convertBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-      reader.onerror = (error) => {
-        reject(error);
-      };
-    });
-  };
+  // const convertBase64 = (file) => {
+  //   return new Promise((resolve, reject) => {
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+  //     reader.onload = () => {
+  //       resolve(reader.result);
+  //     };
+  //     reader.onerror = (error) => {
+  //       reject(error);
+  //     };
+  //   });
+  // };
 
   const showSnackbar = () => {
     if (status === 200) {
@@ -286,7 +298,7 @@ const AddBook = (props) => {
                   onChange={handleFileUpload}
                   type="file"
                   id="uploadedPhoto"
-                  accept="image/jpeg" // TODO: allow png -> currently throws 400 error
+                  accept="image/jpeg, image/png"
                   style={{ display: "none" }}
                 />
               </Button>
