@@ -1,8 +1,7 @@
 /*
 TODO: 
-Review the position of the modal (popout thing), probably looks 
-weird on smaller screens
-Show cover image on card and modal
+- Test the position of the modal, probably looks weird on smaller screens
+- Implement check out
 */
 
 import React from "react";

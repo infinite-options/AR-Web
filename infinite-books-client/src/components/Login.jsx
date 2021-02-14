@@ -3,7 +3,7 @@ Login component is called by navbar.jsx
 
 A lot of code respectfully borrowed from sister site at:
 https://github.com/infinite-options/serving-fresh-react-admin/blob/master/src/admin/AdminLogin.js
-
+TODO: enter keypress submits form
 TODO maybe: the implementation of  the role system.
 authors should be able to see and check out books imo, so the "author" and "both"
 roles do the same thing. I would like to reevaluate whether or not the "both" role

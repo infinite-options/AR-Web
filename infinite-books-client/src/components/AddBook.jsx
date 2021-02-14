@@ -1,9 +1,13 @@
+/*
+TODO: checks for file uploads. don't let users upload wrong type or huge files.
+*/
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "universal-cookie";
 
 // MUI
-import { Grid, Paper, Button } from "@material-ui/core";
+import { Grid, Paper, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -37,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     margin: "0 auto",
     marginTop: 150,
-    height: 400,
+    height: 360,
     width: 600,
     padding: 10,
     position: "relative",
@@ -67,12 +71,11 @@ const useStyles = makeStyles((theme) => ({
     width: 160,
     border: "1px dotted teal",
     fontSize: 8,
+    marginTop: 10,
   },
   modalInputsDiv: {
     width: "75%",
-
-    display: "flex",
-    flexWrap: "wrap",
+    display: "inline-block",
     justifyContent: "center",
     alignContent: "center",
     alignItems: "center",
@@ -92,15 +95,23 @@ function Alert(props) {
 
 const AddBook = (props) => {
   const classes = useStyles();
+
+  // Gets user_uid from cookies. Consider getting from authcontext.
   let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
+
   const [openModal, setOpenModal] = React.useState(false);
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
+
+  const [error, setError] = React.useState("");
+
   const [status, setStatus] = React.useState("");
   const [tempImgFile, setTempImgFile] = useState("");
+  const [pdfFilename, setPdfFilename] = useState("");
   //const [base64File, setBase64File] = useState("");
-  const [file, setFile] = useState({ obj: undefined, url: "" });
+  const [imgFile, setImgFile] = useState({ obj: undefined, url: "" });
+  const [pdfFile, setPdfFile] = useState({ obj: undefined, url: "" });
 
-  useEffect(() => {}, [file]);
+  useEffect(() => {}, [imgFile, pdfFile]);
 
   const handleOpenSnackbar = (event, reason) => {
     if (reason === "clickaway") {
@@ -119,6 +130,7 @@ const AddBook = (props) => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+    clear();
   };
 
   const [post, setPost] = useState({
@@ -139,6 +151,11 @@ const AddBook = (props) => {
       genre: "",
       description: "",
     });
+    setImgFile({ obj: undefined, url: "" });
+    setPdfFile({ obj: undefined, url: "" });
+    setTempImgFile("");
+    setPdfFilename("");
+    setError("");
   };
 
   const postNewBook = () => {
@@ -159,61 +176,73 @@ const AddBook = (props) => {
 
     let bookInfo = {
       title: post.title,
-      book_cover_image: file.obj, // TODO
+      book_cover_image: imgFile.obj,
       author_uid: uid,
       genre: post.genre,
       num_pages: "", // determined dynamically when PDF loads
       description: post.description,
-      format: "pdf", // TODO maybe if we allow uploads in other formats
-      book_link: "", // TODO
+      format: "pdf", // TODO if we ever allow uploads in other formats, don't hard code this
+      book_pdf: pdfFile.obj,
     };
 
-    let formData = new FormData();
-    Object.entries(bookInfo).forEach((entry) => {
-      formData.append(entry[0], entry[1]);
-    });
-
-    // for (var key of formData.entries()) {
-    //   console.log(key[0] + ", " + key[1]);
-    // }
-
-    axios
-      .post(post_url, formData)
-      .then((res) => {
-        console.log(res);
-        let arr = [{ message: res.data.message }];
-        console.log(arr);
-        setStatus(res.status);
-      })
-      .catch((err) => {
-        console.error(err);
+    if (verifyBookInfo(bookInfo)) {
+      let formData = new FormData();
+      Object.entries(bookInfo).forEach((entry) => {
+        formData.append(entry[0], entry[1]);
       });
-    handleOpenSnackbar();
-    clear();
-    handleCloseModal();
+      axios
+        .post(post_url, formData)
+        .then((res) => {
+          console.log(res);
+          let arr = [{ message: res.data.message }];
+          console.log(arr);
+          setStatus(res.status);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      handleOpenSnackbar();
+      handleCloseModal();
+      clear();
+    }
   };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    setTempImgFile(URL.createObjectURL(file));
-    setFile({ obj: file, url: URL.createObjectURL(file) });
-
-    //const base64 = await convertBase64(file);
-    //setBase64File(base64.slice(23))
+    if (file.type === "image/png" || file.type === "image/jpeg") {
+      setTempImgFile(URL.createObjectURL(file));
+      setImgFile({ obj: file, url: URL.createObjectURL(file) });
+    } else if (file.type === "application/pdf") {
+      setPdfFile({ obj: file, url: URL.createObjectURL(file) });
+      setPdfFilename(file.name);
+    } else {
+      console.error(file.type, ": this file type is not supported.");
+    }
   };
 
-  // const convertBase64 = (file) => {
-  //   return new Promise((resolve, reject) => {
-  //     const reader = new FileReader();
-  //     reader.readAsDataURL(file);
-  //     reader.onload = () => {
-  //       resolve(reader.result);
-  //     };
-  //     reader.onerror = (error) => {
-  //       reject(error);
-  //     };
-  //   });
-  // };
+  const verifyBookInfo = (bookInfo) => {
+    let goodToGo = true;
+    if (bookInfo.title === "") {
+      setError("A book title is required");
+      goodToGo = false;
+    }
+
+    if (bookInfo.book_pdf === undefined) {
+      setError("Upload a book");
+      goodToGo = false;
+    }
+
+    return goodToGo;
+  };
+
+  // consider making errors an array and then mapping them to <li>
+  const showErrors = () => {
+    return (
+      <Typography variant="subtitle1" style={{ color: "red" }}>
+        {error}
+      </Typography>
+    );
+  };
 
   const showSnackbar = () => {
     if (status === 200) {
@@ -302,6 +331,7 @@ const AddBook = (props) => {
                   style={{ display: "none" }}
                 />
               </Button>
+
               {tempImgFile !== "" && (
                 <Button
                   size="small"
@@ -313,6 +343,29 @@ const AddBook = (props) => {
                   Remove Cover Image
                 </Button>
               )}
+
+              <Button
+                size="small"
+                variant="contained"
+                component="label"
+                style={{ marginTop: 20 }}
+              >
+                {pdfFilename === "" ? (
+                  <span>Upload book PDF</span>
+                ) : (
+                  <span> Change book PDF</span>
+                )}
+                <input
+                  onChange={handleFileUpload}
+                  type="file"
+                  id="uploadedPhoto"
+                  accept="application/pdf"
+                  style={{ display: "none" }}
+                />
+              </Button>
+              <Typography variant="subtitle1" style={{ marginTop: 4 }}>
+                {pdfFilename}
+              </Typography>
             </div>
             <div className={classes.modalInputsDiv}>
               <TextField
@@ -320,6 +373,7 @@ const AddBook = (props) => {
                 id="textfield-title"
                 name="title"
                 label="Title"
+                autoComplete="off"
                 variant="outlined"
                 onChange={handleChange}
               />
@@ -328,6 +382,7 @@ const AddBook = (props) => {
                 id="textfield-genre"
                 name="genre"
                 label="Genre"
+                autoComplete="off"
                 variant="outlined"
                 onChange={handleChange}
               />
@@ -336,6 +391,7 @@ const AddBook = (props) => {
                 id="textfield-description"
                 name="description"
                 label="Description"
+                autoComplete="off"
                 variant="outlined"
                 multiline
                 rows={4}
@@ -348,6 +404,7 @@ const AddBook = (props) => {
               >
                 Publish
               </Button>
+              <div style={{ marginTop: 10 }}>{showErrors()}</div>
             </div>
           </Paper>
         </Fade>

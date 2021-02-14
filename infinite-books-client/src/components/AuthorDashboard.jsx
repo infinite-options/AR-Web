@@ -1,5 +1,3 @@
-// TODO: change booksUrl to only retrieve books by the logged in author
-
 import { Grid } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -15,6 +13,7 @@ const AuthorDashboard = () => {
     getBooksByAuthorUID();
   }, []);
 
+  // Gets user uid from cookies, consider getting from authcontext instead?
   let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
 
   const [books, setBooks] = useState([]);
@@ -42,7 +41,7 @@ const AuthorDashboard = () => {
     axios
       .get(booksUrl)
       .then((res) => {
-        console.log(res.data.result);
+        //console.log(res.data.result);
         setBooks(res.data.result);
         let bookUidArray = [];
         // Maps each bookUid to a URL in order to generate more get requests

@@ -1,8 +1,13 @@
+// TODO: style is ugly, button and label are in a weird position
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PDFViewer from "./PDFViewer";
 import { Redirect } from "react-router";
+import Cookies from "universal-cookie";
 // import samplePdf from "./BalancingAct.pdf";
+
+const cookies = new Cookies();
 
 const styles = {
   outer: {
@@ -21,6 +26,7 @@ const styles = {
 function ReaderDashboard(props) {
   const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
   //const [result, setResult] = useState([]);
+  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
 
   const [post, setPost] = useState({
     rev_book_uid: "",
@@ -69,7 +75,7 @@ function ReaderDashboard(props) {
       }
       */
       rev_book_uid: props.location.book_uid,
-      reader_id: "100-000002", // TODO: get reader id from login credentials
+      reader_id: uid,
       comments: post.comments,
       rating_title: post.rating_title,
       rating_content: post.rating_content,

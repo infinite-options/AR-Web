@@ -1,15 +1,25 @@
-/* TODO: 
-- long reviews should overflow
-- re-do dropdown.
-- Re-render after adding a new book
+/* FIXME: 
+- long reviews should overflow in table cell, or click to show in modal
+- fix dropdown, I borked it
+   TODO:
+- Edit functionality with axios -- need endpoint
+- Re-render after adding a new book, editing a book, or deleting a book
 */
 
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+// MUI
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Paper, Tooltip, Typography } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
 import Table from "@material-ui/core/Table";
@@ -22,6 +32,7 @@ import TablePagination from "@material-ui/core/TablePagination";
 
 // Icons
 import { AiFillEdit } from "react-icons/ai";
+import { AiFillDelete } from "react-icons/ai";
 import { BiImageAdd } from "react-icons/bi";
 
 import {
@@ -72,16 +83,21 @@ const useStyles = makeStyles((theme) => ({
     width: "85%",
   },
   editButton: {
-    // Todo: position this in the top right corner. currently makes it disappear.
-    // position: "absolute",
-    // top: 0,
-    // right: 0,
     display: "inline-block",
     color: "#309aac",
     border: "1px solid #309aac",
     cursor: "pointer",
     boxShadow: "3px 2px 2px",
     marginBottom: "15px",
+  },
+  deleteButton: {
+    display: "inline-block",
+    color: "#e57373",
+    border: "1px solid #e57373",
+    cursor: "pointer",
+    boxShadow: "3px 2px 2px",
+    marginBottom: "15px",
+    marginLeft: 6,
   },
   uploadImageButton: {
     width: "88%",
@@ -160,7 +176,7 @@ const AuthorBookSelector = (props) => {
     setPage(0);
     setRowsPerPage(5);
     setSelectedBook(e.target.value);
-    console.log(selectedBook);
+    //console.log(selectedBook);
     setBookIsSelected(true);
   };
   const handleChangePage = (e, newPage) => {
@@ -285,11 +301,10 @@ const AuthorBookSelector = (props) => {
       <FormControl className={classes.formControl}>
         <span style={{ fontWeight: "bold", marginBottom: 5 }}>My books</span>
         <InputLabel className={classes.inputLabel}>Select a book</InputLabel>
-        <Select
-          defaultValue={""}
-          value={props.books[0]}
-          onChange={handleSelect}
-        >
+        <Select value={props.books[0]} onChange={handleSelect}>
+          <MenuItem value={""}>
+            <Typography>Select a book</Typography>
+          </MenuItem>
           {props.books.map((book, index) => (
             <MenuItem value={book} key={index}>
               {book.title}
@@ -303,6 +318,7 @@ const AuthorBookSelector = (props) => {
 
   const [editMode, setEditMode] = useState(false);
   const [bookIsSelected, setBookIsSelected] = useState(false);
+
   const handleChange = () => {
     //todo
   };
@@ -319,6 +335,9 @@ const AuthorBookSelector = (props) => {
               <AiFillEdit size={24} />
             </div>
           </Tooltip>
+          <div className={classes.deleteButton} onClick={handleDialogueOpen}>
+            <AiFillDelete size={24} />
+          </div>
 
           <div className={classes.bookDisplayContainer}>
             <div className={classes.imageAndTitleContainer}>
@@ -401,7 +420,7 @@ const AuthorBookSelector = (props) => {
                     />
                   ) : (
                     <div>
-                      {selectedBook.genre === null ? (
+                      {selectedBook.genre === "" ? (
                         <Typography
                           variant="body1"
                           style={{
@@ -442,7 +461,7 @@ const AuthorBookSelector = (props) => {
                 />
               ) : (
                 <div>
-                  {selectedBook.description === null ? (
+                  {selectedBook.description === "" ? (
                     <Typography
                       variant="body1"
                       style={{ fontStyle: "italic", color: "lightslategray" }}
@@ -479,6 +498,66 @@ const AuthorBookSelector = (props) => {
     }
   };
 
+  const [openDialogue, setOpenDialogue] = React.useState(false);
+
+  const handleDialogueOpen = () => {
+    setOpenDialogue(true);
+  };
+
+  const handleDialogueClose = () => {
+    setOpenDialogue(false);
+  };
+
+  const handleDelete = () => {
+    let delete_api =
+      "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/DeleteBook";
+    let bookToDelete = {
+      book_uid: selectedBook.book_uid,
+    };
+
+    axios
+      .post(delete_api, bookToDelete)
+      .then((res) => {
+        console.log(res);
+        let arr = [{ message: res.data.message }];
+        console.log(arr);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    setOpenDialogue(false);
+  };
+
+  const showAlert = () => {
+    return (
+      <div>
+        <Dialog
+          open={openDialogue}
+          onClose={handleDialogueClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Confirm Delete"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              You are about to permanently delete{" "}
+              <span style={{ fontStyle: "italic" }}>{selectedBook.title}</span>.
+              This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogueClose} color="secondary">
+              Nevermind
+            </Button>
+            <Button onClick={handleDelete} color="primary">
+              Do it
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+  };
+
   const handleEdit = () => {
     setEditMode(!editMode);
   };
@@ -492,7 +571,7 @@ const AuthorBookSelector = (props) => {
     );
   };
 
-  /* TODO: after implementing book edit functionality -> see example in AddBook.js
+  /* TODO: add snackbar after implementing book edit functionality -> see example in AddBook.js
 
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [status, setStatus] = React.useState("");
@@ -558,6 +637,7 @@ const AuthorBookSelector = (props) => {
           ? displayAuthorStats()
           : reviewTable()}
       </Grid>
+      {showAlert()}
     </Grid>
   );
 };

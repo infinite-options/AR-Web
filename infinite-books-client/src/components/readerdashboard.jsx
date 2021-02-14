@@ -38,7 +38,6 @@ function Dashboard(props) {
   // Emulates componentDidMount -> loads books from db on component load
   useEffect(
     () => {
-      console.log(Auth.username);
       getAllBooks();
     },
     // pass an array as an optional second argument to avoid infinite loop

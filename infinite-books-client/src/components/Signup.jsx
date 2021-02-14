@@ -1,8 +1,9 @@
-// TODO:
-// error handling for email & password,
-// password should have some complexity constraint,
-// use redux to maintain app login state,
-// the inputs are ugly,
+/* TODO:
+  - add google/facebook/apple login buttons & functionality
+  - error handling for email & password,
+  - password should have some complexity constraint,
+  - styles are ugly
+*/
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -118,7 +119,7 @@ const styles = {
 
 function Signup(props) {
   const url =
-    "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp"; // TODO
+    "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp";
 
   const [post, setPost] = useState({
     email: "",
@@ -272,8 +273,8 @@ function Signup(props) {
   const [careerField, setCareerField] = useState("");
   const [income, setIncome] = useState("");
 
-  //TODO: instead of having 6 different functions for each select event,
-  // find a way to consolidate them into one.
+  /*TODO: instead of having 6 different functions for each select event,
+   consolidate them into one. */
   const handleGenderSelect = (e) => {
     setGender(e.target.value);
   };

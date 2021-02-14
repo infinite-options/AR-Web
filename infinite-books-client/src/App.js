@@ -51,7 +51,9 @@ function App() {
       .get(BASE_URL + cookies.get("user_uid"))
       .then((response) => {
         console.log("Account:", response);
-        let newAccountType = response.data.result[0].role.toLowerCase();
+        let newAccountType = response.data.result[0]
+          ? response.data.result[0].role.toLowerCase()
+          : undefined;
         if (isMounted) {
           setAccountType(response.data.result[0].role ? newAccountType : "");
           setUsername(response.data.result[0].username);
