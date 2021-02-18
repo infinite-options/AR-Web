@@ -30,12 +30,11 @@ const AuthorDashboard = () => {
   useEffect(() => {
     accumulateAuthorStats(books, reviews);
   }, [books, reviews]);
-
-  const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
+  const url = process.env.REACT_APP_SERVER_BASE_URI;
 
   const getBooksByAuthorUID = () => {
-    const booksUrl = url + "/api/v2/BooksByAuthorUID/" + uid;
-    const reviewByBookUidUrl = url + "/api/v2/ReviewByBookUID/";
+    const booksUrl = url + "BooksByAuthorUID/" + uid;
+    const reviewByBookUidUrl = url + "ReviewByBookUID/";
     console.log(booksUrl);
     // Gets books by author UID
     axios

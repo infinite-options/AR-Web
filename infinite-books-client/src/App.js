@@ -2,18 +2,18 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { Route, Switch } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./components/Auth/AuthContext";
 import axios from "axios";
 
 // components
 import Home from "./components/pages/HomePage/Home";
-import ReaderDashboard from "./components/ReaderDashboard";
+import ReaderDashboard from "./components/pages/Readers/ReaderDashboard";
 import Navbar from "./components/navbar";
 import Footer from "./components/Footer";
 import Books from "./components/pages/Books/Books";
-import Signup from "./components/Signup";
-import AuthorDashboard from "./components/AuthorDashboard";
-import ReadingPane from "./components/ReadingPane";
+import Signup from "./components/Auth/Signup";
+import AuthorDashboard from "./components/pages/Authors/AuthorDashboard";
+import ReadingPane from "./components/pages/Readers/ReadingPane";
 
 const cookies = new Cookies();
 
@@ -42,13 +42,12 @@ function App() {
   Nobody: 0
   */
 
-  const BASE_URL =
-    "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/OneUserArg/";
+  const get_user_url = process.env.REACT_APP_SERVER_BASE_URI + "OneUserArg/";
 
   useEffect(() => {
     let isMounted = true; // note this flag denote mount status
     axios
-      .get(BASE_URL + cookies.get("user_uid"))
+      .get(get_user_url + cookies.get("user_uid"))
       .then((response) => {
         console.log("Account:", response);
         let newAccountType = response.data.result[0]

@@ -1,5 +1,7 @@
 /*
-TODO: checks for file uploads. don't let users upload wrong type or huge files.
+TODO: 
+  - add checks for file uploads. don't let users upload wrong type or huge files.
+  - "something went wrong" snackbar appears for a second before "good job" on good post
 */
 
 import React, { useState, useEffect } from "react";
@@ -72,6 +74,7 @@ const useStyles = makeStyles((theme) => ({
     border: "1px dotted teal",
     fontSize: 8,
     marginTop: 10,
+    marginLeft: 4,
   },
   modalInputsDiv: {
     width: "75%",
@@ -159,8 +162,7 @@ const AddBook = (props) => {
   };
 
   const postNewBook = () => {
-    let post_url =
-      "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/InsertNewBook";
+    const post_url = process.env.REACT_APP_SERVER_BASE_URI + "InsertNewBook";
     /*
         {
             "title":"test",

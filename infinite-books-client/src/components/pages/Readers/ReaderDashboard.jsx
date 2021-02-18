@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../AuthContext";
-import Emoji from "./Emoji";
-import BookCard from "./pages/Books/BookCard";
+import { AuthContext } from "../../Auth/AuthContext";
+import Emoji from "../../Emoji";
+import BookCard from "../Books/BookCard";
 
 const styles = {
   container: {
@@ -32,7 +32,7 @@ const styles = {
 
 function Dashboard(props) {
   const Auth = useContext(AuthContext);
-  const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
+  const allBooksUrl = process.env.REACT_APP_SERVER_BASE_URI + "AllBooks";
   const [books, setBooks] = useState([]);
 
   // Emulates componentDidMount -> loads books from db on component load
@@ -45,11 +45,8 @@ function Dashboard(props) {
   );
 
   const getAllBooks = () => {
-    // Fetches books from db
-    const AllBooksUrl = url + "/api/v2/AllBooks";
-    //console.log(AllBooksUrl);
     axios
-      .get(AllBooksUrl)
+      .get(allBooksUrl)
       .then((res) => {
         //console.log(res);
         setBooks(res.data.result);

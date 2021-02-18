@@ -11,7 +11,7 @@ is necessary at a future date.
 */
 
 import React, { useState, useContext, useEffect } from "react";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "./AuthContext";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -63,10 +63,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = (props) => {
   const classes = useStyles();
-
   const Auth = useContext(AuthContext);
-  const API_URL =
-    "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/";
+  const API_URL = process.env.REACT_APP_SERVER_BASE_URI;
 
   const [emailValue, setEmail] = useState("");
   const [passwordValue, setPassword] = useState("");
@@ -74,16 +72,17 @@ const Login = (props) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (
-      process.env.REACT_APP_APPLE_CLIENT_ID &&
-      process.env.REACT_APP_APPLE_REDIRECT_URI
-    ) {
-      window.AppleID.auth.init({
-        clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
-        scope: "email",
-        redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
-      });
-    }
+    // TODO: uncomment this stuff when implementing apple login
+    // if (
+    //   process.env.REACT_APP_APPLE_CLIENT_ID &&
+    //   process.env.REACT_APP_APPLE_REDIRECT_URI
+    // ) {
+    //   window.AppleID.auth.init({
+    //     clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
+    //     scope: "email",
+    //     redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
+    //   });
+    // }
     // Note: search query parameters used for Apple Login
     let queryString = props.location.search;
     let urlParams = new URLSearchParams(queryString);
@@ -137,16 +136,17 @@ const Login = (props) => {
   }, []);
 
   useEffect(() => {
-    if (
-      process.env.REACT_APP_APPLE_CLIENT_ID &&
-      process.env.REACT_APP_APPLE_REDIRECT_URI
-    ) {
-      window.AppleID.auth.init({
-        clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
-        scope: "email",
-        redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
-      });
-    }
+    // TODO: uncommment when implementing apple login
+    // if (
+    //   process.env.REACT_APP_APPLE_CLIENT_ID &&
+    //   process.env.REACT_APP_APPLE_REDIRECT_URI
+    // ) {
+    //   window.AppleID.auth.init({
+    //     clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
+    //     scope: "email",
+    //     redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
+    //   });
+    // }
     let queryString = props.location.search;
     let urlParams = new URLSearchParams(queryString);
     // Clear Query parameters

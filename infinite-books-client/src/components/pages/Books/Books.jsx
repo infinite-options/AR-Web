@@ -26,7 +26,6 @@ const styles = {
 };
 
 function Books(props) {
-  const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
   const [books, setBooks] = useState([]);
 
   // Emulates componentDidMount -> loads books from db on component load
@@ -39,10 +38,10 @@ function Books(props) {
   );
 
   const getAllBooks = () => {
-    const AllBooksUrl = url + "/api/v2/AuthorForEachBook";
-    //console.log(AllBooksUrl);
+    const allBooksUrl =
+      process.env.REACT_APP_SERVER_BASE_URI + "AuthorForEachBook";
     axios
-      .get(AllBooksUrl)
+      .get(allBooksUrl)
       .then((res) => {
         console.log(res);
         setBooks(res.data.result);

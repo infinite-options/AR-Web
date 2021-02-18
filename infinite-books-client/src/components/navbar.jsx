@@ -4,10 +4,9 @@ import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
 import { Button } from "./Button";
-import Login from "./Login";
+import Login from "./Auth/Login";
 import Cookies from "js-cookie";
-import { AuthContext } from "../AuthContext";
-
+import { AuthContext } from "./Auth/AuthContext";
 import "./Navbar.css";
 
 // Icons

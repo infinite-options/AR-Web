@@ -24,7 +24,8 @@ const styles = {
 };
 
 function ReaderDashboard(props) {
-  const url = "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev";
+  const url = process.env.REACT_APP_SERVER_BASE_URI;
+
   //const [result, setResult] = useState([]);
   let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
 
@@ -118,7 +119,7 @@ function ReaderDashboard(props) {
               />
               <button
                 name="submit"
-                value="/api/v2/InsertNewReview"
+                value="InsertNewReview"
                 onClick={sendPostArgs}
               >
                 Submit

@@ -509,14 +509,13 @@ const AuthorBookSelector = (props) => {
   };
 
   const handleDelete = () => {
-    let delete_api =
-      "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/DeleteBook";
+    const delete_url = process.env.REACT_APP_SERVER_BASE_URI + "DeleteBook";
     let bookToDelete = {
       book_uid: selectedBook.book_uid,
     };
 
     axios
-      .post(delete_api, bookToDelete)
+      .post(delete_url, bookToDelete)
       .then((res) => {
         console.log(res);
         let arr = [{ message: res.data.message }];

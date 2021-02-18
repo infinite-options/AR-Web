@@ -3,11 +3,14 @@
   - error handling for email & password,
   - password should have some complexity constraint,
   - styles are ugly
+  - stuff like bio etc. are never used on the site
+  - make first and last name required so books don't show up with a blank author name
+  - tell the user to expect a confirmation email (alert not working)
 */
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button } from "./Button";
+import { Button } from "../Button";
 import { withRouter } from "react-router-dom";
 
 // MUI
@@ -18,6 +21,12 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import * as MuiButton from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 // Icons & images
 import { FaQuestionCircle } from "react-icons/fa";
@@ -118,8 +127,7 @@ const styles = {
 };
 
 function Signup(props) {
-  const url =
-    "https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp";
+  const signup_url = process.env.REACT_APP_SERVER_BASE_URI + "SignUp";
 
   const [post, setPost] = useState({
     email: "",
@@ -179,9 +187,6 @@ function Signup(props) {
 
   const sendPostArgs = (e) => {
     if (validate(post.email, post.password, post.password2, post.username)) {
-      // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/SignUp
-      const post_url = url;
-      //console.log(post_url);
       let payload = {
         /*
           {
@@ -211,12 +216,12 @@ function Signup(props) {
         */
 
         username: post.username,
-        first_name: "",
-        last_name: "",
-        pen_name: post.pen_name,
+        first_name: post.first_name,
+        last_name: post.last_name,
+        pen_name: "", // TODO maybe in the future give users this option
         bio: post.bio,
-        language: post.language,
-        likes_writing_about: post.likes_writing_about,
+        language: "",
+        likes_writing_about: "",
         role: selectedOption,
         gender: gender,
         educationLevel: educationLevel,
@@ -235,15 +240,17 @@ function Signup(props) {
       };
       console.log(payload);
       axios
-        .post(post_url, payload)
+        .post(signup_url, payload)
         .then((res) => {
           console.log(res);
-          let arr = [{ message: res.data.message }];
+          handleClickOpen();
+          //let arr = [{ message: res.data.message }];
           //console.log(arr);
         })
         .catch((err) => {
           console.error(err);
         });
+
       clear();
     }
   };
@@ -495,11 +502,19 @@ function Signup(props) {
           Please fill out some information about you as an author
         </Typography>
         <input
-          name="pen_name"
+          name="first_name"
           style={styles.inputRight}
           autoComplete="off"
-          value={post.pen_name}
-          placeholder="Your pen name"
+          value={post.first_name}
+          placeholder="First name"
+          onChange={handleChange}
+        />
+        <input
+          name="last_name"
+          style={styles.inputRight}
+          autoComplete="off"
+          value={post.last_name}
+          placeholder="Last name"
           onChange={handleChange}
         />
         <textarea
@@ -511,7 +526,7 @@ function Signup(props) {
           placeholder="Bio"
           onChange={handleChange}
         />
-        <input
+        {/* <input
           name="language"
           style={styles.inputRight}
           autoComplete="off"
@@ -526,7 +541,7 @@ function Signup(props) {
           value={post.likes_writing_about}
           placeholder="What do you like writing about?"
           onChange={handleChange}
-        />
+        /> */}
       </>
     );
   }
@@ -596,6 +611,16 @@ function Signup(props) {
         );
     }
   }
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
@@ -693,6 +718,30 @@ function Signup(props) {
           </Paper>
         </Grid>
       </form>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Please confirm your email address"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            A confirmation email has been sent to {post.email}. Please click the
+            link that was sent in order to continue using Infinite Books.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Disagree
+          </Button>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
