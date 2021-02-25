@@ -20,6 +20,8 @@
     "mdbreact": "^4.27.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-facebook-login": "^4.1.1",
+    "react-google-login": "^5.2.2",
     "react-icons": "^3.11.0",
     "react-parallax": "^3.0.3",
     "react-pdf": "^5.1.0",

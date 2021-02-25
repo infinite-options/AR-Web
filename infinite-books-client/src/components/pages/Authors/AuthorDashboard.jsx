@@ -35,7 +35,7 @@ const AuthorDashboard = () => {
   const getBooksByAuthorUID = () => {
     const booksUrl = url + "BooksByAuthorUID/" + uid;
     const reviewByBookUidUrl = url + "ReviewByBookUID/";
-    console.log(booksUrl);
+    //console.log(booksUrl);
     // Gets books by author UID
     axios
       .get(booksUrl)

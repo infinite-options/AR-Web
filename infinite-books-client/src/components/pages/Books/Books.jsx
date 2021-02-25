@@ -1,8 +1,11 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import Cookies from "universal-cookie";
 import FeaturedBook from "./FeaturedBook";
 import { bookObjOne } from "./FeaturedBookData";
 import BookCard from "./BookCard";
+
+const cookies = new Cookies();
 
 const styles = {
   container: {
@@ -26,16 +29,18 @@ const styles = {
 };
 
 function Books(props) {
+  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
+
+  const [checkedOutBooks, setCheckedOutBooks] = useState([]);
   const [books, setBooks] = useState([]);
 
-  // Emulates componentDidMount -> loads books from db on component load
-  useEffect(
-    () => {
-      getAllBooks();
-    },
-    // pass an array as an optional second argument to avoid infinite loop
-    []
-  );
+  useEffect(() => {
+    getAllBooks();
+    getCheckedOutBooks();
+  }, []);
+  useEffect(() => {
+    console.log(checkedOutBooks);
+  }, [books, checkedOutBooks]);
 
   const getAllBooks = () => {
     const allBooksUrl =
@@ -45,6 +50,25 @@ function Books(props) {
       .then((res) => {
         console.log(res);
         setBooks(res.data.result);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const getCheckedOutBooks = () => {
+    const checkedOutBooksUrl =
+      process.env.REACT_APP_SERVER_BASE_URI + "BooksCheckedOut";
+    const payload = {
+      user_uid: uid,
+    };
+    axios
+      .post(checkedOutBooksUrl, payload)
+      .then((res) => {
+        console.log(res.data.result);
+        let checkedOutBooksTemp = [];
+        res.data.result.map((book) => checkedOutBooksTemp.push(book.book_uid));
+        setCheckedOutBooks(checkedOutBooksTemp);
       })
       .catch((err) => {
         console.error(err);
@@ -65,6 +89,9 @@ function Books(props) {
         book_cover_image={bookObject["book_cover_image"]}
         description={bookObject["description"]}
         book_link={bookObject["book_link"]}
+        book_is_checked_out={checkedOutBooks.some(
+          (book) => book === bookObject["book_uid"]
+        )}
       />
     );
   });

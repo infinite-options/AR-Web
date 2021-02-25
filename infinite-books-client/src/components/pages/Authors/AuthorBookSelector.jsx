@@ -1,9 +1,12 @@
 /* FIXME: 
-- long reviews should overflow in table cell, or click to show in modal
-- fix dropdown, I borked it
+ - long reviews should overflow in table cell, or click to show in modal
+ - fix dropdown, I borked it
+ - editing book cover and pdf does not work
+
    TODO:
-- Edit functionality with axios -- need endpoint
+- Style for title, genre and discription could use some polish
 - Re-render after adding a new book, editing a book, or deleting a book
+- File is kinda big, consider making the table its own component
 */
 
 import React, { useState, useEffect } from "react";
@@ -42,6 +45,10 @@ import {
   FormControl,
   Select,
 } from "@material-ui/core";
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles((theme) => ({
   gridContainer: {
@@ -119,12 +126,15 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexFlow: "column",
   },
+  imageDiv: {
+    height: 240,
+    width: 160,
+  },
   noImageDiv: {
     justifyContent: "space-between",
-    padding: 15,
     fontStyle: "italic",
     textAlign: "center",
-    height: 220,
+    height: 240,
     width: 160,
     border: "1px dotted teal",
     fontSize: 8,
@@ -172,11 +182,19 @@ const AuthorBookSelector = (props) => {
   useEffect(() => {}, [selectedBook, props]);
 
   const handleSelect = (e) => {
+    /*
+    image : e.target.value.book_cover_image
+    pdf: e.target.value.book_link
+    */
+    console.log(e.target.value);
     setEditMode(false);
     setPage(0);
     setRowsPerPage(5);
+    setTempImgFile("");
+    setPdfFilename("");
+    //setImgFile(new File(e.target.value.book_link, e.target.value.book_link));
+    //console.log(imgFile);
     setSelectedBook(e.target.value);
-    //console.log(selectedBook);
     setBookIsSelected(true);
   };
   const handleChangePage = (e, newPage) => {
@@ -318,184 +336,101 @@ const AuthorBookSelector = (props) => {
 
   const [editMode, setEditMode] = useState(false);
   const [bookIsSelected, setBookIsSelected] = useState(false);
-
-  const handleChange = () => {
-    //todo
+  const [error, setError] = React.useState("");
+  const [post, setPost] = useState({
+    title: selectedBook.title,
+    genre: selectedBook.genre,
+    description: selectedBook.description,
+  });
+  const handleChange = (e) => {
+    e.persist();
+    setPost({ ...post, [e.target.name]: e.target.value });
+    console.log(post);
   };
-  const handleEditSubmit = () => {
-    // todo
+
+  const clear = () => {
+    setPost({
+      title: "",
+      genre: "",
+      description: "",
+    });
+    // setImgFile({ obj: undefined, url: "" });
+    // setPdfFile({ obj: undefined, url: "" });
+    // setTempImgFile("");
+    // setPdfFilename("");
+    setError("");
   };
 
-  const bookDisplay = () => {
-    if (bookIsSelected) {
-      return (
-        <>
-          <Tooltip title="Click to edit" placement="right">
-            <div className={classes.editButton} onClick={handleEdit}>
-              <AiFillEdit size={24} />
-            </div>
-          </Tooltip>
-          <div className={classes.deleteButton} onClick={handleDialogueOpen}>
-            <AiFillDelete size={24} />
-          </div>
+  const [tempImgFile, setTempImgFile] = useState("");
+  const [pdfFilename, setPdfFilename] = useState("");
+  const [imgFile, setImgFile] = useState({ obj: undefined, url: "" });
+  const [pdfFile, setPdfFile] = useState({ obj: undefined, url: "" });
 
-          <div className={classes.bookDisplayContainer}>
-            <div className={classes.imageAndTitleContainer}>
-              {selectedBook.book_cover_image === "" ? (
-                <div className={classes.noImageDiv}>
-                  <Typography variant="subtitle2">
-                    No book cover to display.
-                  </Typography>
-                  {editMode && (
-                    <Button
-                      className={classes.uploadImageButton}
-                      onClick={handleEditSubmit}
-                    >
-                      <BiImageAdd />
-                      Upload Image
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <img
-                    src={selectedBook.book_cover_image}
-                    alt=""
-                    style={{ height: "220px", width: "160px" }}
-                  />
-                  {editMode && (
-                    <Button
-                      className={classes.uploadImageButton}
-                      onClick={handleEditSubmit}
-                    >
-                      <BiImageAdd size={20} style={{ paddingRight: 5 }} />
-                      Change Image
-                    </Button>
-                  )}
-                </div>
-              )}
+  useEffect(() => {}, [imgFile, pdfFile, tempImgFile]);
 
-              <div className={classes.titleAndGenreContainer}>
-                <div className={classes.bookDisplayTypography}>
-                  <Typography
-                    className={classes.bookDisplayHeader}
-                    variant="h6"
-                  >
-                    Title
-                  </Typography>
-                  {editMode ? (
-                    <TextField
-                      className={classes.editTextfield}
-                      id="textfield-title"
-                      name="title"
-                      label="Title"
-                      variant="outlined"
-                      size="small"
-                      defaultValue={selectedBook.title}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Typography variant="body1">
-                      {selectedBook.title}
-                    </Typography>
-                  )}
-                </div>
-                <div className={classes.bookDisplayTypography}>
-                  <Typography
-                    className={classes.bookDisplayHeader}
-                    variant="h6"
-                  >
-                    Genre
-                  </Typography>
-                  {editMode ? (
-                    <TextField
-                      className={classes.editTextfield}
-                      id="textfield-genre"
-                      name="genre"
-                      label="Genre"
-                      variant="outlined"
-                      size="small"
-                      defaultValue={selectedBook.genre}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <div>
-                      {selectedBook.genre === "" ? (
-                        <Typography
-                          variant="body1"
-                          style={{
-                            fontStyle: "italic",
-                            color: "lightslategray",
-                          }}
-                        >
-                          Nothing to display. Click the edit button to add
-                          something.
-                        </Typography>
-                      ) : (
-                        <Typography variant="body1">
-                          {selectedBook.genre}
-                        </Typography>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className={classes.bookDisplayTypography}>
-              <Typography className={classes.bookDisplayHeader} variant="h6">
-                Description
-              </Typography>
-              {editMode ? (
-                <TextField
-                  className={classes.editTextfield}
-                  id="textfield-description"
-                  name="description"
-                  label="Description"
-                  variant="outlined"
-                  size="small"
-                  defaultValue={selectedBook.description}
-                  onChange={handleChange}
-                  multiline
-                  rows={4}
-                />
-              ) : (
-                <div>
-                  {selectedBook.description === "" ? (
-                    <Typography
-                      variant="body1"
-                      style={{ fontStyle: "italic", color: "lightslategray" }}
-                    >
-                      Nothing to display. Click the edit button to add
-                      something.
-                    </Typography>
-                  ) : (
-                    <Typography variant="body1">
-                      {selectedBook.description}
-                    </Typography>
-                  )}
-                </div>
-              )}
-              {editMode && (
-                <div className={classes.editButtonGroup}>
-                  <ButtonGroup variant="contained">
-                    <Button color="primary" onClick={handleEditSubmit}>
-                      Save Changes
-                    </Button>
-                    <Button
-                      color="secondary"
-                      onClick={() => setEditMode(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </ButtonGroup>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      );
+  const handleFileUpload = (e) => {
+    console.log(e.target.files);
+    console.log(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file.type === "image/png" || file.type === "image/jpeg") {
+      setTempImgFile(URL.createObjectURL(file));
+      setImgFile({ obj: file, url: URL.createObjectURL(file) });
+    } else if (file.type === "application/pdf") {
+      setPdfFile({ obj: file, url: URL.createObjectURL(file) });
+      setPdfFilename(file.name);
+    } else {
+      console.error(file.type, ": this file type is not supported.");
     }
+  };
+
+  const [status, setStatus] = React.useState("");
+  const [alertReason, setAlertReason] = React.useState("");
+
+  const handleEditSubmit = () => {
+    const update_url = process.env.REACT_APP_SERVER_BASE_URI + "UpdateBook";
+
+    let bookToUpdate = {
+      book_uid: selectedBook.book_uid,
+      data: {
+        title: post.title,
+        genre: post.genre,
+        description: post.description,
+        book_cover_image: imgFile.obj,
+        book_pdf: pdfFile.obj,
+      },
+    };
+
+    if (verifyBookInfo(bookToUpdate)) {
+      let formData = new FormData();
+      Object.entries(bookToUpdate).forEach((entry) => {
+        formData.append(entry[0], entry[1]);
+      });
+      axios
+        .post(formData, bookToUpdate)
+        .then((res) => {
+          console.log(res);
+          let arr = [{ message: res.data.message }];
+          console.log(arr);
+          setStatus(res.status);
+          setAlertReason("Edited");
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      handleOpenSnackbar();
+      handleEdit();
+      clear();
+    }
+  };
+
+  const handleEdit = () => {
+    setEditMode(true);
+  };
+
+  const handleEditCancel = () => {
+    setEditMode(false);
+    setTempImgFile("");
+    setPdfFilename("");
   };
 
   const [openDialogue, setOpenDialogue] = React.useState(false);
@@ -520,11 +455,293 @@ const AuthorBookSelector = (props) => {
         console.log(res);
         let arr = [{ message: res.data.message }];
         console.log(arr);
+        setStatus(res.status);
+        setAlertReason("Deleted");
       })
       .catch((err) => {
         console.error(err);
       });
-    setOpenDialogue(false);
+    handleOpenSnackbar();
+    handleDialogueClose();
+  };
+
+  const verifyBookInfo = (bookInfo) => {
+    let goodToGo = true;
+    if (bookInfo.data.title === "") {
+      setError("A book title is required");
+      goodToGo = false;
+    }
+    if (bookInfo.book_pdf === undefined) {
+      setError("Upload a book");
+      goodToGo = false;
+    }
+    return goodToGo;
+  };
+
+  // consider making errors an array and then mapping them to <li>
+  const showErrors = () => {
+    return (
+      <Typography variant="subtitle1" style={{ color: "red" }}>
+        {error}
+      </Typography>
+    );
+  };
+
+  const imageDisplay = () => {
+    if (selectedBook.book_cover_image !== "") {
+      return (
+        <>
+          <div className={classes.imageDiv}>
+            {tempImgFile !== "" ? (
+              <img
+                src={tempImgFile}
+                alt=""
+                style={{ height: "220px", width: "160px" }}
+              />
+            ) : (
+              <img
+                src={selectedBook.book_cover_image}
+                alt=""
+                style={{ height: "220px", width: "160px" }}
+              />
+            )}
+
+            {editMode && (
+              <Button
+                color="primary"
+                size="small"
+                variant="contained"
+                component="label"
+                style={{ marginTop: 1 }}
+              >
+                <Typography>Change cover image</Typography>
+                <input
+                  onChange={handleFileUpload}
+                  type="file"
+                  id="uploadedPhoto"
+                  accept="image/jpeg, image/png"
+                  style={{ display: "none" }}
+                />
+              </Button>
+            )}
+          </div>
+        </>
+      );
+    } else {
+      if (tempImgFile !== "") {
+        return (
+          <>
+            <div className={classes.imageDiv}>
+              <img
+                src={tempImgFile}
+                alt=""
+                style={{ height: "220px", width: "160px" }}
+              />
+              {editMode && (
+                <Button
+                  color="primary"
+                  size="small"
+                  variant="contained"
+                  component="label"
+                  style={{ marginTop: 5 }}
+                >
+                  <Typography>Change cover image</Typography>
+                  <input
+                    onChange={handleFileUpload}
+                    type="file"
+                    id="uploadedPhoto"
+                    accept="image/jpeg, image/png"
+                    style={{ display: "none" }}
+                  />
+                </Button>
+              )}
+            </div>
+          </>
+        );
+      } else {
+        return (
+          <div className={classes.noImageDiv}>
+            <Typography variant="subtitle2">
+              No book cover to display.
+            </Typography>
+            {editMode && (
+              <Button
+                color="primary"
+                size="small"
+                variant="contained"
+                component="label"
+                style={{ marginTop: 5 }}
+              >
+                <Typography size="large" variant="body2">
+                  Add cover image
+                </Typography>
+                <input
+                  onChange={handleFileUpload}
+                  type="file"
+                  id="uploadedPhoto"
+                  accept="image/jpeg, image/png"
+                  style={{ display: "none" }}
+                />
+              </Button>
+            )}
+          </div>
+        );
+      }
+    }
+  };
+
+  const bookDisplay = () => {
+    if (bookIsSelected) {
+      return (
+        <>
+          <Tooltip title="Click to edit" placement="right">
+            <div
+              className={classes.editButton}
+              onClick={editMode ? () => handleEditCancel() : () => handleEdit()}
+            >
+              <AiFillEdit size={24} />
+            </div>
+          </Tooltip>
+          <div className={classes.deleteButton} onClick={handleDialogueOpen}>
+            <AiFillDelete size={24} />
+          </div>
+          <div className={classes.bookDisplayContainer}>
+            <div className={classes.imageAndTitleContainer}>
+              {imageDisplay()}
+              <div className={classes.bookDisplayTypography}>
+                <Typography className={classes.bookDisplayHeader} variant="h6">
+                  Title
+                </Typography>
+                {editMode ? (
+                  <TextField
+                    className={classes.editTextfield}
+                    id="textfield-title"
+                    name="title"
+                    label="Title"
+                    variant="outlined"
+                    size="small"
+                    defaultValue={selectedBook.title}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Typography variant="body1">{selectedBook.title}</Typography>
+                )}
+              </div>
+            </div>
+
+            <div className={classes.titleAndGenreContainer}>
+              <div className={classes.bookDisplayTypography}>
+                <Typography className={classes.bookDisplayHeader} variant="h6">
+                  Genre
+                </Typography>
+                {editMode ? (
+                  <TextField
+                    className={classes.editTextfield}
+                    id="textfield-genre"
+                    name="genre"
+                    label="Genre"
+                    variant="outlined"
+                    size="small"
+                    defaultValue={selectedBook.genre}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <div>
+                    {selectedBook.genre === "" ? (
+                      <Typography
+                        variant="body1"
+                        style={{
+                          fontStyle: "italic",
+                          color: "lightslategray",
+                        }}
+                      >
+                        Nothing to display. Click the edit button to add
+                        something.
+                      </Typography>
+                    ) : (
+                      <Typography variant="body1">
+                        {selectedBook.genre}
+                      </Typography>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={classes.bookDisplayTypography}>
+            <Typography className={classes.bookDisplayHeader} variant="h6">
+              Description
+            </Typography>
+            {editMode ? (
+              <TextField
+                className={classes.editTextfield}
+                id="textfield-description"
+                name="description"
+                label="Description"
+                variant="outlined"
+                size="small"
+                defaultValue={selectedBook.description}
+                onChange={handleChange}
+                multiline
+                rows={4}
+              />
+            ) : (
+              <div>
+                {selectedBook.description === "" ? (
+                  <Typography
+                    variant="body1"
+                    style={{ fontStyle: "italic", color: "lightslategray" }}
+                  >
+                    Nothing to display. Click the edit button to add something.
+                  </Typography>
+                ) : (
+                  <Typography variant="body1">
+                    {selectedBook.description}
+                  </Typography>
+                )}
+              </div>
+            )}
+            {editMode && (
+              <span>
+                <Button
+                  size="small"
+                  color="primary"
+                  variant="contained"
+                  component="label"
+                  style={{ marginTop: 20 }}
+                >
+                  Change book PDF
+                  <input
+                    onChange={handleFileUpload}
+                    type="file"
+                    id="uploadedPdf"
+                    accept="application/pdf"
+                    style={{ display: "none" }}
+                  />
+                </Button>
+                <Typography variant="subtitle1" style={{ marginTop: 4 }}>
+                  {pdfFilename}
+                </Typography>
+              </span>
+            )}
+            {editMode && (
+              <div className={classes.editButtonGroup}>
+                {showErrors()}
+                <ButtonGroup variant="contained">
+                  <Button color="primary" onClick={handleEditSubmit}>
+                    Save Changes
+                  </Button>
+                  <Button color="secondary" onClick={() => handleEditCancel()}>
+                    Cancel
+                  </Button>
+                </ButtonGroup>
+              </div>
+            )}
+          </div>
+        </>
+      );
+    }
   };
 
   const showAlert = () => {
@@ -557,10 +774,6 @@ const AuthorBookSelector = (props) => {
     );
   };
 
-  const handleEdit = () => {
-    setEditMode(!editMode);
-  };
-
   const noBooksToDisplay = () => {
     return (
       <Typography variant={"subtitle2"}>
@@ -570,10 +783,8 @@ const AuthorBookSelector = (props) => {
     );
   };
 
-  /* TODO: add snackbar after implementing book edit functionality -> see example in AddBook.js
-
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [status, setStatus] = React.useState("");
+
   const handleOpenSnackbar = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -584,6 +795,7 @@ const AuthorBookSelector = (props) => {
   const handleCloseSnackbar = (event, reason) => {
     setOpenSnackbar(false);
   };
+
   const showSnackbar = () => {
     if (status === 200) {
       return (
@@ -594,7 +806,7 @@ const AuthorBookSelector = (props) => {
             onClose={handleCloseSnackbar}
           >
             <Alert onClose={handleCloseSnackbar} severity="success">
-              {post.title} published successfully!
+              {post.title} {alertReason} successfully!
             </Alert>
           </Snackbar>
         </>
@@ -613,7 +825,6 @@ const AuthorBookSelector = (props) => {
       );
     }
   };
-  */
 
   return (
     <Grid container spacing={1} className={classes.gridContainer}>
@@ -637,6 +848,7 @@ const AuthorBookSelector = (props) => {
           : reviewTable()}
       </Grid>
       {showAlert()}
+      {showSnackbar()}
     </Grid>
   );
 };

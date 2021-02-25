@@ -1,7 +1,7 @@
 /*
 TODO: 
   - add checks for file uploads. don't let users upload wrong type or huge files.
-  - "something went wrong" snackbar appears for a second before "good job" on good post
+  - snackbar not giving "good job" message on 200OK
 */
 
 import React, { useState, useEffect } from "react";
@@ -110,7 +110,6 @@ const AddBook = (props) => {
   const [status, setStatus] = React.useState("");
   const [tempImgFile, setTempImgFile] = useState("");
   const [pdfFilename, setPdfFilename] = useState("");
-  //const [base64File, setBase64File] = useState("");
   const [imgFile, setImgFile] = useState({ obj: undefined, url: "" });
   const [pdfFile, setPdfFile] = useState({ obj: undefined, url: "" });
 
@@ -199,18 +198,19 @@ const AddBook = (props) => {
           let arr = [{ message: res.data.message }];
           console.log(arr);
           setStatus(res.status);
+          //handleOpenSnackbar();
         })
         .catch((err) => {
           console.error(err);
         });
-      handleOpenSnackbar();
+
       handleCloseModal();
-      clear();
     }
   };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
+    console.log(e.target.files[0]);
     if (file.type === "image/png" || file.type === "image/jpeg") {
       setTempImgFile(URL.createObjectURL(file));
       setImgFile({ obj: file, url: URL.createObjectURL(file) });
@@ -360,7 +360,7 @@ const AddBook = (props) => {
                 <input
                   onChange={handleFileUpload}
                   type="file"
-                  id="uploadedPhoto"
+                  id="uploadedPdf"
                   accept="application/pdf"
                   style={{ display: "none" }}
                 />

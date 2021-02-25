@@ -3,6 +3,16 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../Auth/AuthContext";
 import Emoji from "../../Emoji";
 import BookCard from "../Books/BookCard";
+import Cookies from "universal-cookie";
+
+// MUI
+import { Typography } from "@material-ui/core";
+
+/*
+  TODO: get user_uid by Auth rather than cookies
+*/
+
+const cookies = new Cookies();
 
 const styles = {
   container: {
@@ -31,50 +41,68 @@ const styles = {
 };
 
 function Dashboard(props) {
+  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
   const Auth = useContext(AuthContext);
-  const allBooksUrl = process.env.REACT_APP_SERVER_BASE_URI + "AllBooks";
   const [books, setBooks] = useState([]);
 
-  // Emulates componentDidMount -> loads books from db on component load
-  useEffect(
-    () => {
-      getAllBooks();
-    },
-    // pass an array as an optional second argument to avoid infinite loop
-    []
-  );
+  useEffect(() => {
+    getAllBooks();
+  }, []);
 
   const getAllBooks = () => {
+    const checkedOutBooksUrl =
+      process.env.REACT_APP_SERVER_BASE_URI + "BooksCheckedOut";
+    const payload = {
+      user_uid: uid,
+    };
     axios
-      .get(allBooksUrl)
+      .post(checkedOutBooksUrl, payload)
       .then((res) => {
-        //console.log(res);
-        setBooks(res.data.result);
+        console.log(res.data.result);
+        let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
+        console.log(uniqueBooks);
+        setBooks(uniqueBooks);
       })
       .catch((err) => {
         console.error(err);
       });
   };
+  // https://stackoverflow.com/questions/2218999/remove-duplicates-from-an-array-of-objects-in-javascript
+  const getUniqueListBy = (arr, key) => {
+    return [...new Map(arr.map((item) => [item[key], item])).values()];
+  };
 
   //console.log(books);
-  const bookCards = [];
-  books.forEach((bookObject) => {
-    bookCards.push(
-      <BookCard
-        key={bookObject["book_uid"]}
-        book_uid={bookObject["book_uid"]}
-        variant={"readable"}
-        title={bookObject["title"]}
-        author={bookObject["author"]}
-        genre={bookObject["genre"]}
-        num_pages={bookObject["num_pages"]}
-        format={bookObject["format"]}
-        book_cover_image={bookObject["book_cover_image"]}
-        description={bookObject["description"]}
-        book_link={bookObject["book_link"]}
-      />
-    );
-  });
+  const bookCards = () => {
+    let bookCardsArray = [];
+    books.forEach((bookObject) => {
+      bookCardsArray.push(
+        <BookCard
+          key={bookObject["book_uid"]}
+          book_uid={bookObject["book_uid"]}
+          variant={"readable"}
+          title={bookObject["title"]}
+          author={bookObject["author"]}
+          genre={bookObject["genre"]}
+          num_pages={bookObject["num_pages"]}
+          format={bookObject["format"]}
+          book_cover_image={bookObject["book_cover_image"]}
+          description={bookObject["description"]}
+          book_link={bookObject["book_link"]}
+        />
+      );
+    });
+    if (bookCardsArray.length > 0) {
+      return bookCardsArray;
+    } else {
+      return (
+        <Typography>
+          You don't have any books checked out. Head on over to the Books tab to
+          check something out.
+        </Typography>
+      );
+    }
+  };
 
   return (
     <>
@@ -84,7 +112,7 @@ function Dashboard(props) {
         <Emoji symbol="📚" label="books" />
       </div>
       <hr style={styles.hr} />
-      <div style={styles.container}>{bookCards}</div>
+      <div style={styles.container}>{bookCards()}</div>
     </>
   );
 }

@@ -1,18 +1,29 @@
 /*
+BookCard: called by Books and AuthorDashboard. 
+prop variant determines type of book card, 
+variant="preview" adds a "check out" button while
+variant="readable" adds "start reading" button 
+(assumes book is checked out already)
 TODO: 
+- Implement book return 
 - Test the position of the modal, probably looks weird on smaller screens
 - Implement check out
+- better styles/formatting for the modal (title, author, etc)
 */
 
 import React from "react";
+import axios from "axios";
+import Cookies from "universal-cookie";
 // mui
-import { Paper } from "@material-ui/core";
+import { Paper, Typography } from "@material-ui/core";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { AiFillCloseSquare } from "react-icons/ai";
-import { Button } from "../../Button";
+import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
+
+const cookies = new Cookies();
 
 const styles = {
   cardContainer: {
@@ -58,7 +69,7 @@ const styles = {
   modalContainer: {
     //height: "50vh",
     //width: "90vh",
-    height: "auto",
+    height: 480,
     width: 820,
     display: "flex",
     alignItems: "center",
@@ -72,19 +83,17 @@ const styles = {
   },
   modalImg: {
     width: 300,
-    height: 402,
-    padding: "auto",
+    height: 400,
     border: "1px solid lightgrey",
-    textAlign: "center",
-    alignItems: "center",
-    alignContent: "center",
     marginLeft: 10,
+    marginTop: 4,
   },
   modalInfo: {
+    display: "table",
+    textAlign: "center",
     width: 500,
     height: 480,
     padding: "auto",
-    textAlign: "center",
     alignItems: "center",
     alignContent: "center",
   },
@@ -95,12 +104,20 @@ const styles = {
     color: "#31555c",
     cursor: "pointer",
   },
+  muiButton: {
+    display: "table-cell",
+    verticalAlign: "bottom",
+  },
+  modalText: {
+    padding: 10,
+  },
 };
 
 function BookCard(props) {
   const [open, setOpen] = React.useState(false);
 
   const handleOpen = () => {
+    console.log(props);
     setOpen(true);
   };
 
@@ -108,13 +125,59 @@ function BookCard(props) {
     setOpen(false);
   };
 
+  /*
+  Checkout TODO:
+  get all books checked out by user
+  if book not checked out by user, check out button -> InsertNewReview
+  else, button says "in library" or something, onClick links to Readers
+  */
+  const handleCheckout = () => {
+    const post_url = process.env.REACT_APP_SERVER_BASE_URI + "InsertNewReview";
+    let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
+
+    let payload = {
+      rev_book_uid: props.book_uid,
+      reader_id: uid,
+    };
+
+    console.log(payload);
+    axios
+      .post(post_url, payload)
+      .then((res) => {
+        console.log(res);
+        let arr = [{ message: res.data.message }];
+        console.log(arr);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   let button;
   if (props.variant === "preview") {
-    button = (
-      <Button buttonSize="btn--wide" buttonColor="blue">
-        Check Out
-      </Button>
-    );
+    if (props.book_is_checked_out) {
+      button = (
+        <Button
+          disabled
+          style={styles.muiButton}
+          variant="contained"
+          color="secondary"
+        >
+          In Library
+        </Button>
+      );
+    } else {
+      button = (
+        <Button
+          style={styles.muiButton}
+          variant="contained"
+          color="primary"
+          onClick={handleCheckout}
+        >
+          Check Out
+        </Button>
+      );
+    }
   } else if (props.variant === "readable") {
     button = (
       <>
@@ -125,13 +188,14 @@ function BookCard(props) {
             book_uid: props.book_uid,
           }}
         >
-          <Button buttonSize="btn--wide" buttonColor="blue">
+          <Button style={styles.muiButton} variant="contained" color="primary">
             Start Reading
           </Button>
         </Link>
       </>
     );
   } else {
+    // should probably never enter this case
     button = (
       <Button
         buttonSize="btn--wide"
@@ -142,28 +206,6 @@ function BookCard(props) {
       </Button>
     );
   }
-
-  /*
-  Checkout process: add new row to reviews table where user uid = review uid
-  */
-  const handleCheckout = () => {
-    console.log("You clicked me :)");
-    // let post_url = "";
-
-    // let payload = {};
-
-    // console.log(payload);
-    // axios
-    //   .post(post_url, payload)
-    //   .then((res) => {
-    //     console.log(res);
-    //     let arr = [{ message: res.data.message }];
-    //     console.log(arr);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //   });
-  };
 
   return (
     <React.Fragment>
@@ -207,12 +249,24 @@ function BookCard(props) {
                 />
               </div>
               <div style={styles.modalInfo}>
-                <h1>{props.title}</h1>
-                <p>Author: {props.author}</p>
-                {props.genre && <p>Genre: {props.genre}</p>}
-                {props.num_pages && <p>Number of pages: {props.num_pages}</p>}
-                {props.format && <p>Format: {props.format}</p>}
-                {props.description && <p>{props.description}</p>}
+                <Typography variant="h3" style={styles.modalText}>
+                  {props.title}
+                </Typography>
+                <Typography variant="h5" style={styles.modalText}>
+                  Author: {props.author}
+                </Typography>
+                {props.genre && (
+                  <Typography variant="subtitle2" style={styles.modalText}>
+                    Genre: {props.genre}
+                  </Typography>
+                )}
+                {/* {props.num_pages && <p>Number of pages: {props.num_pages}</p>} */}
+                {/* {props.format && <p>Format: {props.format}</p>} */}
+                {props.description && (
+                  <Typography variant="body1" style={styles.modalText}>
+                    Description: {props.description}
+                  </Typography>
+                )}
                 {button}
               </div>
             </div>

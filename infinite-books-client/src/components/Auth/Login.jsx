@@ -23,6 +23,7 @@ import { FaGoogle, FaFacebookF, FaApple, FaEnvelope } from "react-icons/fa";
 // MUI
 import { makeStyles } from "@material-ui/core/styles";
 import { Button as MuiButton, Typography } from "@material-ui/core";
+import SocialLogin from "./SocialLogin";
 
 const useStyles = makeStyles((theme) => ({
   modalEmailSignIn: {
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     alignItems: "center",
     alignContent: "center",
+    marginLeft: 20,
   },
   modalButton: {
     textTransform: "none",
@@ -72,7 +74,7 @@ const Login = (props) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    // TODO: uncomment this stuff when implementing apple login
+    // TODO uncomment if we implement apple login
     // if (
     //   process.env.REACT_APP_APPLE_CLIENT_ID &&
     //   process.env.REACT_APP_APPLE_REDIRECT_URI
@@ -136,7 +138,7 @@ const Login = (props) => {
   }, []);
 
   useEffect(() => {
-    // TODO: uncommment when implementing apple login
+    // TODO uncomment to use apple login
     // if (
     //   process.env.REACT_APP_APPLE_CLIENT_ID &&
     //   process.env.REACT_APP_APPLE_REDIRECT_URI
@@ -439,30 +441,7 @@ const Login = (props) => {
         <div style={{ marginTop: 10 }}>{showError()}</div>
       </div>
       <div className={classes.modalButtonGroup}>
-        <MuiButton
-          variant="contained"
-          color="default"
-          className={classes.modalButton}
-          startIcon={<FaGoogle />}
-        >
-          Sign In With Google
-        </MuiButton>
-        <MuiButton
-          variant="contained"
-          color="default"
-          className={classes.modalButton}
-          startIcon={<FaFacebookF />}
-        >
-          Sign In With Facebook
-        </MuiButton>
-        <MuiButton
-          variant="contained"
-          color="default"
-          className={classes.modalButton}
-          startIcon={<FaApple />}
-        >
-          Sign In With Apple
-        </MuiButton>
+        <SocialLogin setError={setError} setErrorMessage={setErrorMessage} />
       </div>
 
       <div className={classes.modalRegister}>
