@@ -1,8 +1,7 @@
 /*
 Login component is called by navbar.jsx
 
-A lot of code respectfully borrowed from sister site at:
-https://github.com/infinite-options/serving-fresh-react-admin/blob/master/src/admin/AdminLogin.js
+FIXME: SocialLogin is called on component mount without useEffect
 TODO: enter keypress submits form
 TODO maybe: the implementation of  the role system.
 authors should be able to see and check out books imo, so the "author" and "both"
@@ -10,12 +9,13 @@ roles do the same thing. I would like to reevaluate whether or not the "both" ro
 is necessary at a future date.
 */
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { AuthContext } from "./AuthContext";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
+import SocialLogin from "./SocialLogin";
 
 // Icons
 import { FaGoogle, FaFacebookF, FaApple, FaEnvelope } from "react-icons/fa";
@@ -23,7 +23,6 @@ import { FaGoogle, FaFacebookF, FaApple, FaEnvelope } from "react-icons/fa";
 // MUI
 import { makeStyles } from "@material-ui/core/styles";
 import { Button as MuiButton, Typography } from "@material-ui/core";
-import SocialLogin from "./SocialLogin";
 
 const useStyles = makeStyles((theme) => ({
   modalEmailSignIn: {
@@ -73,102 +72,6 @@ const Login = (props) => {
   const [errorValue, setError] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    // TODO uncomment if we implement apple login
-    // if (
-    //   process.env.REACT_APP_APPLE_CLIENT_ID &&
-    //   process.env.REACT_APP_APPLE_REDIRECT_URI
-    // ) {
-    //   window.AppleID.auth.init({
-    //     clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
-    //     scope: "email",
-    //     redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
-    //   });
-    // }
-    // Note: search query parameters used for Apple Login
-    let queryString = props.location.search;
-    let urlParams = new URLSearchParams(queryString);
-    // Clear Query parameters
-    window.history.pushState({}, document.title, window.location.pathname);
-    // console.log(props,urlParams)
-    // Successful Log in with Apple, set cookies, context, redirect
-    if (urlParams.has("id")) {
-      let customerId = urlParams.get("id");
-      Auth.setIsAuth(true);
-      Cookies.set("login-session", "good");
-      Cookies.set("customer_uid", customerId);
-      axios
-        .get(process.env.REACT_APP_SERVER_BASE_URI + "Profile/" + customerId)
-        .then((response) => {
-          console.log("Account:", response);
-          let newAccountType = response.data.result[0].role.toLowerCase();
-          switch (newAccountType) {
-            case "admin":
-              Auth.setAuthLevel(4);
-              props.history.push("/admin");
-              break;
-            case "both":
-              Auth.setAuthLevel(3);
-              props.history.push("/authors");
-              break;
-            case "author":
-              Auth.setAuthLevel(2);
-              props.history.push("/authors");
-              break;
-            case "reader":
-              Auth.setAuthLevel(1);
-              props.history.push("/readers");
-              break;
-            default:
-              Auth.setAuthLevel(0);
-              props.history.push("/");
-              break;
-          }
-        })
-        .catch((err) => {
-          console.log(err.response || err);
-        });
-      props.history.push("/admin");
-    }
-    // Log which media platform user should have signed in with instead of Apple
-    // May eventually implement to display the message for which platform to Login
-    else if (urlParams.has("media")) {
-      console.log(urlParams.get("media"));
-    }
-  }, []);
-
-  useEffect(() => {
-    // TODO uncomment to use apple login
-    // if (
-    //   process.env.REACT_APP_APPLE_CLIENT_ID &&
-    //   process.env.REACT_APP_APPLE_REDIRECT_URI
-    // ) {
-    //   window.AppleID.auth.init({
-    //     clientId: process.env.REACT_APP_APPLE_CLIENT_ID,
-    //     scope: "email",
-    //     redirectURI: process.env.REACT_APP_APPLE_REDIRECT_URI,
-    //   });
-    // }
-    let queryString = props.location.search;
-    let urlParams = new URLSearchParams(queryString);
-    // Clear Query parameters
-    window.history.pushState({}, document.title, window.location.pathname);
-    //console.log(props, urlParams);
-    // Successful Log in with Apple, set cookies, context, redirect
-    if (urlParams.has("id")) {
-      let customerId = urlParams.get("id");
-      Auth.setIsAuth(true);
-      Cookies.set("login-session", "good");
-      Cookies.set("customer_uid", customerId);
-      props.history.push("/admin");
-    }
-    // Log which media platform user should have signed in with instead of Apple
-    // May eventually implement to display the message for which platform to Login
-    else if (urlParams.has("media")) {
-      console.log(urlParams.get("media"));
-    }
-  }, []);
-
   // For text fields
   const handleChange = (e) => {
     e.persist();
@@ -198,7 +101,6 @@ const Login = (props) => {
   };
 
   const verifyLoginInfo = (e) => {
-    // https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/AccountSalt
     let payload = {
       email: emailValue,
     };
@@ -206,8 +108,8 @@ const Login = (props) => {
     axios
       .post(API_URL + "AccountSalt", payload)
       .then((res) => {
+        console.log(res);
         let saltObject = res;
-
         if (!(saltObject.data.code && saltObject.data.code !== 280)) {
           let hashAlg = saltObject.data.result[0].password_algorithm;
           let salt = saltObject.data.result[0].password_salt;
@@ -409,6 +311,10 @@ const Login = (props) => {
     return <Typography style={{ color: "red" }}>{errorMessage}</Typography>;
   };
 
+  const googleCallback = (profileObject, responseAccessToken) => {
+    // don't delete this function
+  };
+
   return (
     <>
       <div className={classes.modalEmailSignIn}>
@@ -435,13 +341,23 @@ const Login = (props) => {
           // onChange={handleChange}
         />
         <p></p>
-        <MuiButton variant="contained" onClick={verifyLoginInfo}>
+        <MuiButton
+          variant="contained"
+          color="primary"
+          onClick={verifyLoginInfo}
+        >
           Sign In
         </MuiButton>
         <div style={{ marginTop: 10 }}>{showError()}</div>
       </div>
       <div className={classes.modalButtonGroup}>
-        <SocialLogin setError={setError} setErrorMessage={setErrorMessage} />
+        <SocialLogin
+          setError={setError}
+          setErrorMessage={setErrorMessage}
+          googleCallback={googleCallback}
+          closeHandler={props.closeHandler}
+          callingComponent={"Login"}
+        />
       </div>
 
       <div className={classes.modalRegister}>

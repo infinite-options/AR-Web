@@ -27,7 +27,8 @@ const styles = {
 };
 
 function App() {
-  let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
+  let uid =
+    cookies.get("user_uid") === undefined ? "" : cookies.get("user_uid");
 
   const [accountType, setAccountType] = useState();
   const [isAuth, setIsAuth] = useState(uid === "" ? false : true);
@@ -53,7 +54,7 @@ function App() {
         let newAccountType = response.data.result[0]
           ? response.data.result[0].role.toLowerCase()
           : undefined;
-        if (isMounted) {
+        if (isMounted && response.data.result[0]) {
           setAccountType(response.data.result[0].role ? newAccountType : "");
           setUsername(response.data.result[0].username);
         }

@@ -1,19 +1,22 @@
 /* TODO:
-  - add google/facebook/apple login buttons & functionality
+  - need to test more for error cases with google signup
   - error handling for email & password,
   - password should have some complexity constraint,
-  - styles are ugly
+  - styles are ugly, especially inputs
   - stuff like bio etc. are never used on the site
   - make first and last name required so books don't show up with a blank author name
   - tell the user to expect a confirmation email (alert not working)
 */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Button } from "../Button";
 import { withRouter } from "react-router-dom";
+import PropTypes from "prop-types";
+import SocialLogin from "./SocialLogin";
 
 // MUI
+import { makeStyles } from "@material-ui/core/styles";
 import { Paper, Tooltip, Typography } from "@material-ui/core";
 import { Grid } from "@material-ui/core";
 import Chip from "@material-ui/core/Chip";
@@ -27,22 +30,25 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Box from "@material-ui/core/Box";
 
 // Icons & images
 import { FaQuestionCircle } from "react-icons/fa";
+import { FaGoogle, FaFacebookF, FaEnvelope } from "react-icons/fa";
 
 const styles = {
   container: {
     display: "flex",
     flexWrap: "nowrap",
-    //border: "1px solid gray",
-    height: 420,
+
+    height: "auto",
     textAlign: "center",
     justifyContent: "center",
-    padding: 15,
     margin: "auto",
-    backgroundColor: "#e0f2f1",
-    borderRadius: 5,
+    backgroundColor: "#F5F5F5",
   },
   inputDiv: {
     display: "flex",
@@ -52,14 +58,13 @@ const styles = {
     alignItems: "center",
     alignContent: "center",
     width: "65%",
-    padding: "2px",
   },
   emailSignIn: {
-    width: "50%",
-    borderRight: "1px solid lightgray",
+    padding: 0,
+    margin: 0,
   },
   conditionalDiv: {
-    // border: "1px solid black",
+    //border: "1px solid black",
     width: "45%",
     height: "80%",
     padding: 10,
@@ -77,6 +82,12 @@ const styles = {
     margin: 2,
     padding: 5,
     marginTop: 6,
+  },
+  inputUsername: {
+    width: "55%",
+    margin: 2,
+    padding: 5,
+    marginTop: 18,
   },
   inputRight: {
     width: "85%",
@@ -123,8 +134,46 @@ const styles = {
     color: "red",
     fontSize: 8,
     textDecoration: "italic",
+    marginTop: 6,
   },
 };
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box p={3}>{children}</Box>}
+    </div>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.paper,
+    height: 420,
+    borderRight: "1px solid silver",
+  },
+}));
 
 function Signup(props) {
   const signup_url = process.env.REACT_APP_SERVER_BASE_URI + "SignUp";
@@ -132,7 +181,7 @@ function Signup(props) {
   const [post, setPost] = useState({
     email: "",
     password: "",
-    password2: "",
+    confirmPassword: "",
     username: "",
     pen_name: "",
     bio: "",
@@ -149,7 +198,7 @@ function Signup(props) {
     setPost({
       email: "",
       password: "",
-      password2: "",
+      confirmPassword: "",
       username: "",
       pen_name: "",
       bio: "",
@@ -163,8 +212,9 @@ function Signup(props) {
       ...errors,
       ["email"]: "",
       ["password"]: "",
-      ["password2"]: "",
+      ["confirmPassword"]: "",
       ["username"]: "",
+      ["request"]: "",
     });
   };
 
@@ -180,72 +230,87 @@ function Signup(props) {
     clearErrors();
     e.persist();
     setPost({ ...post, [e.target.name]: e.target.value });
-    //console.log(post);
   };
 
+  const [googleButtonClicked, setGoogleButtonClicked] = useState(false);
   const [userRegistered, setUserRegistered] = useState(false);
+  const [userSocialMedia, setUserSocialMedia] = useState("FALSE");
+  const [accessToken, setAccessToken] = useState("NULL");
+  const [socialId, setSocialId] = useState("NULL");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    username: "",
+    request: "",
+  });
+
+  const googleCallback = (profileObject, responseAccessToken) => {
+    console.log(profileObject);
+    setUserSocialMedia("GOOGLE");
+    setEmail(profileObject.email);
+    setAccessToken(responseAccessToken);
+    setFirstName(profileObject.givenName);
+    setLastname(profileObject.familyName);
+    setSocialId(profileObject.googleId);
+    setGoogleButtonClicked(true);
+  };
 
   const sendPostArgs = (e) => {
-    if (validate(post.email, post.password, post.password2, post.username)) {
+    if (
+      validate(post.email, post.password, post.confirmPassword, post.username)
+    ) {
       let payload = {
-        /*
-          {
-            "username":"testing",
-            "first_name":"te",
-            "last_name":"st",
-            "pen_name":"name",
-            "bio":"bio",
-            "language":"en",
-            "likes_writing_about":"test",
-            "role":"testingrole",
-            "gender":"M",
-            "educationLevel":"test",
-            "age":"100",
-            "careerField":"test",
-            "income":"10000000000000000",
-            "email":"abcxyz@gmail.com",
-            "phone":"4084084088",
-            "interest":"good books",
-            "hours":"10",
-            "favorites":"fantasy",
-            "social":"FALSE",
-            "access_token":"NULL",
-            "refresh_token":"NULL",
-            "password":"1234"
-          }
-        */
-
         username: post.username,
-        first_name: post.first_name,
-        last_name: post.last_name,
+        first_name: googleButtonClicked ? firstName : post.first_name,
+        last_name: googleButtonClicked ? lastName : post.last_name,
         pen_name: "", // TODO maybe in the future give users this option
-        bio: post.bio,
         language: "",
         likes_writing_about: "",
+        bio: post.bio,
         role: selectedOption,
         gender: gender,
         educationLevel: educationLevel,
         age: age,
         careerField: careerField,
         income: income,
-        email: post.email,
+        email: email,
         phone: "",
         interest: "",
         hours: "",
         favorites: "",
-        social: "FALSE",
-        access_token: "NULL",
-        refresh_token: "NULL",
+        social: userSocialMedia,
+        user_access_token: accessToken,
+        user_refresh_token: "FALSE",
+        mobile_access_token: "FALSE",
+        mobile_refresh_token: "FALSE",
+        user_refresh_token: "NULL",
+        user_created_at: getDateTime(),
+        social_id: socialId,
         password: post.password,
       };
+
       console.log(payload);
       axios
         .post(signup_url, payload)
         .then((res) => {
           console.log(res);
-          handleClickOpen();
-          //let arr = [{ message: res.data.message }];
-          //console.log(arr);
+          if (res.data.code === 200) {
+            console.log("Registration successful");
+            setUserRegistered(true);
+            // TODO: where to redirect after successful registration. log them in?
+            props.history.push("/");
+          } else if (res.data.code === 409) {
+            console.log("Email already taken");
+            setErrors({
+              ...errors,
+              ["request"]: "This email has already been registered.",
+            });
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -255,14 +320,25 @@ function Signup(props) {
     }
   };
 
+  const getDateTime = () => {
+    var today = new Date();
+
+    var date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+
+    var time =
+      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+    var dateTime = date + " " + time;
+    return dateTime;
+  };
+
   const [selectedOption, setSelectedOption] = useState("");
   const [readerDivShown, setReaderDivShown] = useState(false);
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-    password2: "",
-    username: "",
-  });
 
   useEffect(() => {}, [selectedOption]);
 
@@ -280,8 +356,6 @@ function Signup(props) {
   const [careerField, setCareerField] = useState("");
   const [income, setIncome] = useState("");
 
-  /*TODO: instead of having 6 different functions for each select event,
-   consolidate them into one. */
   const handleGenderSelect = (e) => {
     setGender(e.target.value);
   };
@@ -302,50 +376,54 @@ function Signup(props) {
     setIncome(e.target.value);
   };
 
-  const validate = (email, password1, password2, username) => {
+  const validate = (email, password, confirmPassword, username) => {
     let noErrors = true;
-    if (typeof email !== "undefined") {
-      var pattern = new RegExp(
-        /^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i
-      );
-      if (!pattern.test(post.email)) {
-        setErrors({
-          ...errors,
-          ["email"]: "Please enter valid email address.",
-        });
-        noErrors = false;
+    // if value is 1, user is doing social sign up
+    if (!tabValue) {
+      if (typeof email !== "undefined") {
+        var pattern = new RegExp(
+          /^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i
+        );
+        if (!pattern.test(post.email)) {
+          setErrors({
+            ...errors,
+            ["email"]: "Please enter valid email address.",
+          });
+          noErrors = false;
+        }
+        if (email === "") {
+          setErrors({
+            ...errors,
+            ["email"]: "This is a required field.",
+          });
+          noErrors = false;
+        }
       }
-      if (email === "") {
-        setErrors({
-          ...errors,
-          ["email"]: "This is a required field.",
-        });
-        noErrors = false;
+      if (typeof password !== "undefined") {
+        if (password !== confirmPassword) {
+          setErrors({
+            ...errors,
+            ["password"]: "Passwords must match.",
+          });
+          noErrors = false;
+        }
+        if (password === "") {
+          setErrors({
+            ...errors,
+            ["password"]: "This is a required field.",
+          });
+          noErrors = false;
+        }
+        if (confirmPassword === "") {
+          setErrors({
+            ...errors,
+            ["confirmPassword"]: "This is a required field.",
+          });
+          noErrors = false;
+        }
       }
     }
-    if (typeof password1 !== "undefined") {
-      if (password1 !== password2) {
-        setErrors({
-          ...errors,
-          ["password"]: "Passwords must match.",
-        });
-        noErrors = false;
-      }
-      if (password1 === "") {
-        setErrors({
-          ...errors,
-          ["password"]: "This is a required field.",
-        });
-        noErrors = false;
-      }
-      if (password2 === "") {
-        setErrors({
-          ...errors,
-          ["password2"]: "This is a required field.",
-        });
-        noErrors = false;
-      }
-    }
+
     if (typeof username !== "undefined") {
       if (username === "") {
         setErrors({
@@ -354,9 +432,6 @@ function Signup(props) {
         });
         noErrors = false;
       }
-    }
-    if (noErrors) {
-      setUserRegistered(true);
     }
     return noErrors;
   };
@@ -423,6 +498,7 @@ function Signup(props) {
 
   const tooltipText =
     "The information you provide here will be used to help us customize our recommendations, and provide feedback to authors about demographic information. This data will be anonymized, and will not be sold or used to identify you.";
+
   function readerForm(props) {
     return (
       <>
@@ -501,22 +577,26 @@ function Signup(props) {
         <Typography style={{ padding: 10 }}>
           Please fill out some information about you as an author
         </Typography>
-        <input
-          name="first_name"
-          style={styles.inputRight}
-          autoComplete="off"
-          value={post.first_name}
-          placeholder="First name"
-          onChange={handleChange}
-        />
-        <input
-          name="last_name"
-          style={styles.inputRight}
-          autoComplete="off"
-          value={post.last_name}
-          placeholder="Last name"
-          onChange={handleChange}
-        />
+        {!googleButtonClicked && (
+          <>
+            <input
+              name="first_name"
+              style={styles.inputRight}
+              autoComplete="off"
+              value={post.first_name}
+              placeholder="First name"
+              onChange={handleChange}
+            />
+            <input
+              name="last_name"
+              style={styles.inputRight}
+              autoComplete="off"
+              value={post.last_name}
+              placeholder="Last name"
+              onChange={handleChange}
+            />
+          </>
+        )}
         <textarea
           name="bio"
           rows="3"
@@ -565,23 +645,29 @@ function Signup(props) {
       case "reader":
         return (
           <>
-            <div style={styles.conditionalDiv}>{readerForm()}</div>
-            <div style={styles.conditionalButton}>{submitButton()}</div>
+            <div style={styles.conditionalDiv}>
+              {readerForm()}
+              <div style={styles.conditionalButton}>{submitButton()}</div>
+            </div>
           </>
         );
       case "author":
         return (
           <>
-            <div style={styles.conditionalDiv}>{authorForm()}</div>
-            <div style={styles.conditionalButton}>{submitButton()}</div>
+            <div style={styles.conditionalDiv}>
+              {authorForm()}
+              <div style={styles.conditionalButton}>{submitButton()}</div>
+            </div>
           </>
         );
       case "both": {
         if (!readerDivShown) {
           return (
             <>
-              <div style={styles.conditionalDiv}>{readerForm()}</div>
-              <div style={styles.conditionalButton}>
+              <div style={styles.conditionalDiv}>
+                {readerForm()}
+                <div style={styles.conditionalButton}></div>
+
                 <Button
                   buttonStyle="btn--primary"
                   name="submitButton"
@@ -595,8 +681,10 @@ function Signup(props) {
         } else {
           return (
             <>
-              <div style={styles.conditionalDiv}>{authorForm()}</div>
-              <div style={styles.conditionalButton}>{submitButton()}</div>
+              <div style={styles.conditionalDiv}>
+                {authorForm()}
+                <div style={styles.conditionalButton}>{submitButton()}</div>
+              </div>
             </>
           );
         }
@@ -605,22 +693,67 @@ function Signup(props) {
       default:
         return (
           <>
-            <div style={styles.conditionalDiv}></div>
-            <div style={styles.conditionalButton}></div>
+            <div style={styles.conditionalDiv}>
+              <div style={styles.conditionalButton}></div>
+            </div>
           </>
         );
     }
   }
 
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
+  const roleSelector = () => {
+    return (
+      <div>
+        <Typography variant="h5" style={{ margin: 10, padding: 10 }}>
+          Who do you want to use this site as?
+        </Typography>
+        <Chip
+          style={
+            selectedOption === "reader"
+              ? styles.chipSelected
+              : styles.chipUnselected
+          }
+          label="Reader"
+          variant="outlined"
+          clickable
+          color={selectedOption === "reader" ? "primary" : "default"}
+          onClick={createClickHandler("reader")}
+        />
+        <Chip
+          style={
+            selectedOption === "author"
+              ? styles.chipSelected
+              : styles.chipUnselected
+          }
+          label="Author"
+          variant="outlined"
+          clickable
+          color={selectedOption === "author" ? "primary" : "default"}
+          onClick={createClickHandler("author")}
+        />
+        <Chip
+          style={
+            selectedOption === "both"
+              ? styles.chipSelected
+              : styles.chipUnselected
+          }
+          label="Both"
+          variant="outlined"
+          clickable
+          color={selectedOption === "both" ? "primary" : "default"}
+          onClick={createClickHandler("both")}
+        />
+      </div>
+    );
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const classes = useStyles();
+  const [tabValue, setTabValue] = React.useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
   };
+  useEffect(() => {}, [tabValue]);
 
   return (
     <>
@@ -634,114 +767,92 @@ function Signup(props) {
           style={styles.container}
         >
           <Paper elevation={3} style={styles.inputDiv}>
-            <div style={styles.emailSignIn}>
-              <div style={styles.error}>{errors["email"]}</div>
-              <input
-                name="email"
-                type="email"
-                style={styles.inputLeft}
-                value={post.email}
-                placeholder="Email Address"
-                onChange={handleChange}
-              />
-              <div style={styles.error}>{errors["password"]}</div>
-              <input
-                name="password"
-                type="password"
-                style={styles.inputLeft}
-                value={post.password}
-                placeholder="Password"
-                onChange={handleChange}
-              />
-              <div style={styles.error}>{errors["password2"]}</div>
-              <input
-                name="password2"
-                type="password"
-                style={styles.inputLeft}
-                value={post.password2}
-                placeholder="Confirm Password"
-                onChange={handleChange}
-              />
-              <div style={styles.error}>{errors["username"]}</div>
-              <input
-                name="username"
-                style={styles.inputLeft}
-                value={post.username}
-                placeholder="What should we call you?"
-                onChange={handleChange}
-              />
-
-              <div>
-                <Typography variant="h5" style={{ margin: 10, padding: 10 }}>
-                  Who do you want to use this site as?
-                </Typography>
-                <Chip
-                  style={
-                    selectedOption === "reader"
-                      ? styles.chipSelected
-                      : styles.chipUnselected
-                  }
-                  label="Reader"
-                  variant="outlined"
-                  clickable
-                  color={selectedOption === "reader" ? "primary" : "default"}
-                  onClick={createClickHandler("reader")}
+            <div className={classes.root}>
+              <AppBar position="static">
+                <Tabs
+                  value={tabValue}
+                  onChange={handleTabChange}
+                  aria-label="sign up tab"
+                  centered
+                >
+                  <Tab
+                    label="Email sign up"
+                    icon={<FaEnvelope />}
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    label="Social sign up"
+                    icon={<FaGoogle />}
+                    {...a11yProps(1)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={tabValue} index={0}>
+                <div style={styles.emailSignIn}>
+                  <div style={styles.error}>{errors["email"]}</div>
+                  <input
+                    name="email"
+                    type="email"
+                    style={styles.inputLeft}
+                    value={post.email}
+                    placeholder="Email Address"
+                    onChange={handleChange}
+                  />
+                  <div style={styles.error}>{errors["password"]}</div>
+                  <input
+                    name="password"
+                    type="password"
+                    style={styles.inputLeft}
+                    value={post.password}
+                    placeholder="Password"
+                    onChange={handleChange}
+                  />
+                  <div style={styles.error}>{errors["confirmPassword"]}</div>
+                  <input
+                    name="confirmPassword"
+                    type="password"
+                    style={styles.inputLeft}
+                    value={post.confirmPassword}
+                    placeholder="Confirm Password"
+                    onChange={handleChange}
+                  />
+                  <div style={styles.error}>{errors["username"]}</div>
+                  <input
+                    name="username"
+                    style={styles.inputLeft}
+                    value={post.username}
+                    placeholder="What should we call you?"
+                    onChange={handleChange}
+                  />
+                  {roleSelector()}
+                </div>
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <SocialLogin
+                  googleCallback={googleCallback}
+                  callingComponent={"Signup"}
                 />
-                <Chip
-                  style={
-                    selectedOption === "author"
-                      ? styles.chipSelected
-                      : styles.chipUnselected
-                  }
-                  label="Author"
-                  variant="outlined"
-                  clickable
-                  color={selectedOption === "author" ? "primary" : "default"}
-                  onClick={createClickHandler("author")}
-                />
-                <Chip
-                  style={
-                    selectedOption === "both"
-                      ? styles.chipSelected
-                      : styles.chipUnselected
-                  }
-                  label="Both"
-                  variant="outlined"
-                  clickable
-                  color={selectedOption === "both" ? "primary" : "default"}
-                  onClick={createClickHandler("both")}
-                />
-              </div>
+                {googleButtonClicked && (
+                  <>
+                    <div style={styles.error}>{errors["username"]}</div>
+                    <input
+                      name="username"
+                      style={styles.inputUsername}
+                      value={post.username}
+                      placeholder="What should we call you?"
+                      onChange={handleChange}
+                    />
+                    {roleSelector()}
+                    <div style={styles.error}>{errors["request"]}</div>
+                  </>
+                )}
+              </TabPanel>
             </div>
 
             {handleConditionalRender()}
           </Paper>
         </Grid>
       </form>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Please confirm your email address"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            A confirmation email has been sent to {post.email}. Please click the
-            link that was sent in order to continue using Infinite Books.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Disagree
-          </Button>
-          <Button onClick={handleClose} color="primary" autoFocus>
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

@@ -46,10 +46,11 @@ function Dashboard(props) {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
-    getAllBooks();
+    getCheckedOutBooks();
+    getReviewedBooks();
   }, []);
 
-  const getAllBooks = () => {
+  const getCheckedOutBooks = () => {
     const checkedOutBooksUrl =
       process.env.REACT_APP_SERVER_BASE_URI + "BooksCheckedOut";
     const payload = {
@@ -57,6 +58,25 @@ function Dashboard(props) {
     };
     axios
       .post(checkedOutBooksUrl, payload)
+      .then((res) => {
+        // console.log(res.data.result);
+        let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
+        // console.log(uniqueBooks);
+        setBooks(uniqueBooks);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const getReviewedBooks = () => {
+    const reviewedBooksUrl =
+      process.env.REACT_APP_SERVER_BASE_URI + "ReviewBySingleUser/" + uid;
+    const payload = {
+      user_uid: uid,
+    };
+    axios
+      .get(reviewedBooksUrl, payload)
       .then((res) => {
         console.log(res.data.result);
         let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
@@ -67,6 +87,7 @@ function Dashboard(props) {
         console.error(err);
       });
   };
+
   // https://stackoverflow.com/questions/2218999/remove-duplicates-from-an-array-of-objects-in-javascript
   const getUniqueListBy = (arr, key) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
@@ -75,10 +96,10 @@ function Dashboard(props) {
   //console.log(books);
   const bookCards = () => {
     let bookCardsArray = [];
-    books.forEach((bookObject) => {
+    books.forEach((bookObject, index) => {
       bookCardsArray.push(
         <BookCard
-          key={bookObject["book_uid"]}
+          key={index}
           book_uid={bookObject["book_uid"]}
           variant={"readable"}
           title={bookObject["title"]}

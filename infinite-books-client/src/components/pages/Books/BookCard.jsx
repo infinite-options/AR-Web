@@ -4,6 +4,9 @@ prop variant determines type of book card,
 variant="preview" adds a "check out" button while
 variant="readable" adds "start reading" button 
 (assumes book is checked out already)
+FIXME: as of right now the description column is not in the AuthorForEachBook endpoint
+       so the description is not rendering on the info modal. Requested the fix,
+       so if you see a book description then delete this fixme comment. 
 TODO: 
 - Implement book return 
 - Test the position of the modal, probably looks weird on smaller screens
@@ -69,7 +72,7 @@ const styles = {
   modalContainer: {
     //height: "50vh",
     //width: "90vh",
-    height: 480,
+    height: 500,
     width: 820,
     display: "flex",
     alignItems: "center",
@@ -180,7 +183,7 @@ function BookCard(props) {
     }
   } else if (props.variant === "readable") {
     button = (
-      <>
+      <div>
         <Link
           to={{
             pathname: "/readingpane",
@@ -192,7 +195,10 @@ function BookCard(props) {
             Start Reading
           </Button>
         </Link>
-      </>
+        <Button style={styles.muiButton} variant="contained" color="secondary">
+          Return Book
+        </Button>
+      </div>
     );
   } else {
     // should probably never enter this case
@@ -260,8 +266,6 @@ function BookCard(props) {
                     Genre: {props.genre}
                   </Typography>
                 )}
-                {/* {props.num_pages && <p>Number of pages: {props.num_pages}</p>} */}
-                {/* {props.format && <p>Format: {props.format}</p>} */}
                 {props.description && (
                   <Typography variant="body1" style={styles.modalText}>
                     Description: {props.description}
