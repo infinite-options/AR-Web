@@ -1,12 +1,12 @@
-# Infinite Books
+##### Infinite Books
 
 #### James Goodman
 
-##### jalegoodman@gmail.com
+### jalegoodman@gmail.com
 
 ### BIG LIST OF BUGS AND TODOS
 
-# Get the TODO Tree VSCode extension (or similar) to see in code
+## Get the TODO Tree VSCode extension (or similar) to see in code
 
 - :fire: BUGS :fire:
 
@@ -43,6 +43,8 @@
     - Duplicate reviews exist for certain books from before the new comment system was implemented, which causes issues when trying to return a book. Before making the site live, scrub the DB of test/dummy data and that should fix the problem.
   - ReadingPane.jsx:
     - After submitting a comment, clear the textarea.
+
+:space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader: :space_invader:
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
