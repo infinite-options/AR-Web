@@ -1,5 +1,5 @@
 /*
-BookCard: called by Books and AuthorDashboard. 
+BookCard: called by Books and ReaderDashboard. 
 prop variant determines type of book card, 
 variant="preview" adds a "check out" button while
 variant="readable" adds "start reading" button 
@@ -8,13 +8,11 @@ FIXME: as of right now the description column is not in the AuthorForEachBook en
        so the description is not rendering on the info modal. Requested the fix,
        so if you see a book description then delete this fixme comment. 
 TODO: 
-- Implement book return 
 - Test the position of the modal, probably looks weird on smaller screens
-- Implement check out
 - better styles/formatting for the modal (title, author, etc)
 */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "universal-cookie";
 // mui
@@ -25,6 +23,7 @@ import Fade from "@material-ui/core/Fade";
 import { AiFillCloseSquare } from "react-icons/ai";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
+import { set } from "js-cookie";
 
 const cookies = new Cookies();
 
@@ -127,13 +126,18 @@ function BookCard(props) {
   const handleClose = () => {
     setOpen(false);
   };
+  const [bookIsCheckedOut, setBookIsCheckedOut] = useState(
+    props.book_is_checked_out
+  );
 
-  /*
-  Checkout TODO:
-  get all books checked out by user
-  if book not checked out by user, check out button -> InsertNewReview
-  else, button says "in library" or something, onClick links to Readers
-  */
+  const handleCheckOutStatus = () => {
+    setBookIsCheckedOut(!bookIsCheckedOut);
+  };
+
+  useEffect(() => {
+    //console.log(bookIsCheckedOut);
+  }, [bookIsCheckedOut]);
+
   const handleCheckout = () => {
     const post_url = process.env.REACT_APP_SERVER_BASE_URI + "InsertNewReview";
     let uid = cookies.get("user_uid") === null ? "" : cookies.get("user_uid");
@@ -150,6 +154,50 @@ function BookCard(props) {
         console.log(res);
         let arr = [{ message: res.data.message }];
         console.log(arr);
+        if (res.status === 200) {
+          handleCheckOutStatus();
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const handleReturn = () => {
+    const post_url =
+      process.env.REACT_APP_SERVER_BASE_URI + "ReviewBySingleUser/";
+    let uid = cookies.get("user_uid");
+
+    let payload = {
+      reader_id: uid,
+      book_id: props.book_uid,
+    };
+    console.log(payload);
+    axios
+      .post(post_url, payload)
+      .then((res) => {
+        console.log(res);
+        let review_uid = res.data.result[0].review_uid;
+
+        const review_url =
+          process.env.REACT_APP_SERVER_BASE_URI + "ReturnedBook";
+
+        let second_payload = {
+          review_uid: review_uid,
+        };
+        console.log(second_payload);
+        axios
+          .post(review_url, second_payload)
+          .then((res) => {
+            console.log(res);
+            if (res.status === 200) {
+              props.handleBookReturn();
+              handleCheckOutStatus();
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       })
       .catch((err) => {
         console.error(err);
@@ -158,7 +206,7 @@ function BookCard(props) {
 
   let button;
   if (props.variant === "preview") {
-    if (props.book_is_checked_out) {
+    if (bookIsCheckedOut) {
       button = (
         <Button
           disabled
@@ -182,24 +230,47 @@ function BookCard(props) {
       );
     }
   } else if (props.variant === "readable") {
-    button = (
-      <div>
-        <Link
-          to={{
-            pathname: "/readingpane",
-            pdf: props.book_link,
-            book_uid: props.book_uid,
-          }}
-        >
-          <Button style={styles.muiButton} variant="contained" color="primary">
-            Start Reading
+    if (bookIsCheckedOut) {
+      button = (
+        <div>
+          <Link
+            to={{
+              pathname: "/readingpane",
+              pdf: props.book_link,
+              book_uid: props.book_uid,
+            }}
+          >
+            <Button
+              style={styles.muiButton}
+              variant="contained"
+              color="primary"
+            >
+              Start Reading
+            </Button>
+          </Link>
+          <Button
+            style={styles.muiButton}
+            variant="contained"
+            color="secondary"
+            onClick={handleReturn}
+          >
+            Return Book
           </Button>
-        </Link>
-        <Button style={styles.muiButton} variant="contained" color="secondary">
-          Return Book
+        </div>
+      );
+    } else {
+      button = (
+        <Button
+          style={styles.muiButton}
+          variant="contained"
+          color="primary"
+          disabled
+          onClick={handleReturn}
+        >
+          Returned
         </Button>
-      </div>
-    );
+      );
+    }
   } else {
     // should probably never enter this case
     button = (
@@ -259,16 +330,21 @@ function BookCard(props) {
                   {props.title}
                 </Typography>
                 <Typography variant="h5" style={styles.modalText}>
-                  Author: {props.author}
+                  <p style={{ margin: 2, fontWeight: "bold" }}>Author:</p>{" "}
+                  {props.author}
                 </Typography>
                 {props.genre && (
                   <Typography variant="subtitle2" style={styles.modalText}>
-                    Genre: {props.genre}
+                    <p style={{ margin: 2, fontWeight: "bold" }}>Genre:</p>{" "}
+                    {props.genre}
                   </Typography>
                 )}
                 {props.description && (
                   <Typography variant="body1" style={styles.modalText}>
-                    Description: {props.description}
+                    <p style={{ margin: 2, fontWeight: "bold" }}>
+                      Description:
+                    </p>{" "}
+                    {props.description}
                   </Typography>
                 )}
                 {button}

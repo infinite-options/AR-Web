@@ -23,14 +23,26 @@ const AuthorDashboard = () => {
     numReviews: null,
   });
 
+  /* 
+  Endpoints:
+  GetComments
+    https://ls802wuqo5.execute-api.us-west-1.amazonaws.com/dev/api/v2/GetComments
+    {
+          "review_uid":"300-000044"
+    } 
+
+*/
   // Reviews array is an array of arrays of objects
   // Inner arrays group reviews by book UID
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     accumulateAuthorStats(books, reviews);
+    console.log(books);
   }, [books, reviews]);
   const url = process.env.REACT_APP_SERVER_BASE_URI;
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const getBooksByAuthorUID = () => {
     const booksUrl = url + "BooksByAuthorUID/" + uid;
@@ -60,6 +72,7 @@ const AuthorDashboard = () => {
           reviewObjectsArray.push(promiseObject.data.result);
         });
         setReviews(reviewObjectsArray);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
@@ -78,8 +91,13 @@ const AuthorDashboard = () => {
 
   return (
     <Grid container>
-      <AddBook />
-      <AuthorBookSelector books={books} reviews={reviews} stats={authorStats} />
+      <AddBook books={books} setBooks={setBooks} />
+      <AuthorBookSelector
+        books={books}
+        reviews={reviews}
+        stats={authorStats}
+        loading={isLoading}
+      />
     </Grid>
   );
 };

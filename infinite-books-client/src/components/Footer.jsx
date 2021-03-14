@@ -11,10 +11,16 @@ import {
 } from "react-icons/fa";
 import { GiSpellBook } from "react-icons/gi";
 
+/*
+Footer is called by App.js
+Commented code is unimplemented stuff, like mailing lists and other links.
+Social media links 
+*/
+
 function Footer() {
   return (
     <div className="footer-container">
-      <section className="footer-subscription">
+      {/* <section className="footer-subscription">
         <p className="footer-subscription-heading">
           Join our mailing list to get notified about new and trending books.
         </p>
@@ -60,7 +66,7 @@ function Footer() {
             <Link to="/">Twitter</Link>
           </div>
         </div>
-      </div>
+      </div> */}
       <section className="social-media">
         <div className="social-media-wrap">
           <div className="footer-logo">
@@ -69,27 +75,23 @@ function Footer() {
               Infinite Books
             </Link>
           </div>
-          <small className="website-rights">Infinite Options © 2020</small>
+          <Link
+            className="social-icon-link"
+            to={{
+              pathname: "https://www.infiniteoptions.com/",
+            }}
+            target="_blank"
+            aria-label="LinkedIn"
+          >
+            <small className="website-rights">Infinite Options © 2020</small>
+          </Link>
           <div className="social-icons">
             <Link
               className="social-icon-link"
-              to="/"
-              target="_blank"
-              aria-label="Facebook"
-            >
-              <FaFacebook />
-            </Link>
-            <Link
-              className="social-icon-link"
-              to="/"
-              target="_blank"
-              aria-label="Instagram"
-            >
-              <FaInstagram />
-            </Link>
-            <Link
-              className="social-icon-link"
-              to={"/"}
+              to={{
+                pathname:
+                  "https://www.youtube.com/channel/UCxTyIQ2n4euFZH-rSWzYa7A",
+              }}
               target="_blank"
               aria-label="Youtube"
             >
@@ -97,20 +99,39 @@ function Footer() {
             </Link>
             <Link
               className="social-icon-link"
-              to="/"
-              target="_blank"
-              aria-label="Twitter"
-            >
-              <FaTwitter />
-            </Link>
-            <Link
-              className="social-icon-link"
-              to="/"
+              to={{
+                pathname:
+                  "https://www.linkedin.com/company/infinite-options-llc/",
+              }}
               target="_blank"
               aria-label="LinkedIn"
             >
               <FaLinkedin />
             </Link>
+            {/* <Link
+              className="social-icon-link"
+              to="/"
+              target="_blank"
+              aria-label="Facebook"
+            >
+              <FaFacebook />
+            </Link> */}
+            {/* <Link
+              className="social-icon-link"
+              to="/"
+              target="_blank"
+              aria-label="Instagram"
+            >
+              <FaInstagram />
+            </Link> */}
+            {/* <Link
+              className="social-icon-link"
+              to="/"
+              target="_blank"
+              aria-label="Twitter"
+            >
+              <FaTwitter />
+            </Link> */}
           </div>
         </div>
       </section>

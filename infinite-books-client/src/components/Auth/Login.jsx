@@ -1,7 +1,6 @@
 /*
 Login component is called by navbar.jsx
 
-FIXME: SocialLogin is called on component mount without useEffect
 TODO: enter keypress submits form
 TODO maybe: the implementation of  the role system.
 authors should be able to see and check out books imo, so the "author" and "both"
@@ -18,7 +17,7 @@ import { withRouter } from "react-router";
 import SocialLogin from "./SocialLogin";
 
 // Icons
-import { FaGoogle, FaFacebookF, FaApple, FaEnvelope } from "react-icons/fa";
+import { FaEnvelope } from "react-icons/fa";
 
 // MUI
 import { makeStyles } from "@material-ui/core/styles";
@@ -73,11 +72,11 @@ const Login = (props) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   // For text fields
-  const handleChange = (e) => {
-    e.persist();
-    setPost({ ...post, [e.target.name]: e.target.value });
-    console.log(post);
-  };
+  // const handleChange = (e) => {
+  //   e.persist();
+  //   setPost({ ...post, [e.target.name]: e.target.value });
+  //   console.log(post);
+  // };
 
   const [post, setPost] = useState({
     email: "",
@@ -108,9 +107,11 @@ const Login = (props) => {
     axios
       .post(API_URL + "AccountSalt", payload)
       .then((res) => {
-        console.log(res);
+        //console.log("AccountSalt: ", res);
         let saltObject = res;
-        if (!(saltObject.data.code && saltObject.data.code !== 280)) {
+        console.log(saltObject.data.code);
+        console.log(!(saltObject.data.code && saltObject.data.code !== 200));
+        if (!(saltObject.data.code && saltObject.data.code !== 200)) {
           let hashAlg = saltObject.data.result[0].password_algorithm;
           let salt = saltObject.data.result[0].password_salt;
 
@@ -133,6 +134,7 @@ const Login = (props) => {
               const encoder = new TextEncoder();
               const data = encoder.encode(saltedPassword);
               //Hash salted password
+
               crypto.subtle.digest(hashAlg, data).then((res) => {
                 let hash = res;
                 // Decode hash with hex digest
@@ -149,7 +151,7 @@ const Login = (props) => {
                   social_id: "",
                   signup_platform: "",
                 };
-
+                //console.log(API_URL + "Login", loginObject);
                 axios
                   .post(API_URL + "Login", loginObject, {
                     headers: {
@@ -157,21 +159,22 @@ const Login = (props) => {
                     },
                   })
                   .then((res) => {
-                    console.log(res);
+                    console.log("Login: ", res.data.code);
                     if (res.data.code === 200) {
                       setError("");
                       console.log("Login success");
                       let userInfo = res.data.result[0];
-                      Auth.setIsAuth(true);
-                      Auth.setUsername(userInfo.username);
                       Cookies.set("login-session", "good");
                       Cookies.set("user_uid", userInfo.user_uid);
+                      Auth.setIsAuth(true);
+                      Auth.setUsername(userInfo.username);
                       props.closeHandler();
                       let accountType = userInfo.role.toLowerCase();
+                      console.log(accountType);
                       switch (accountType) {
                         case "admin":
                           Auth.setAuthLevel(4);
-                          props.history.push("/admin");
+                          props.history.push("/");
                           break;
                         case "both":
                           Auth.setAuthLevel(3);

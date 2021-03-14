@@ -6,7 +6,7 @@ export const bookObjOne = {
   title: "Balancing Act",
   author: "Prashant Marathay & Rishika Kenkre",
   description:
-    "Placeholder text. The back cover or flap description of the book will go here. If you have this written out already, please email it to me at jalegoodman@gmail.com Otherwise write it and make it as clickbaity as possible to amass readership. By reading this book, all of your wildest dreams will come true!",
+    "For Michael, things just got a whole lot more serious.  Now he has to learn how to think creatively and strategically with a deadline looming.  Learn how he does it, and how you can do it too, in this unique business novel.",
   buttonLabel: "Start Reading",
   imgStart: "",
   img: "/images/balancingActCover.png", // todo

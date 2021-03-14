@@ -1,4 +1,4 @@
-// FIXME: SocialLogin is called on component mount without useEffect
+// Called by Login.jsx
 
 import React, { useContext } from "react";
 import GoogleLogin from "react-google-login";
@@ -39,18 +39,12 @@ const SocialLogin = (props) => {
         console.log(res);
         if (res.data.code === 200) {
           let userInfo = res.data.result[0];
-          console.log(userInfo);
+          //console.log(userInfo);
           Cookies.set("login-session", "good");
           Cookies.set("user_uid", userInfo.user_uid);
           Auth.setIsAuth(true);
+          Auth.setUsername(userInfo.username);
           let newAccountType = userInfo.role.toLowerCase();
-          /* Auth levels:
-                Admin:  4
-                Both:   3
-                Author: 2
-                Reader: 1
-                Nobody: 0
-              */
           switch (newAccountType) {
             case "admin":
               Auth.setAuthLevel(4);
@@ -117,7 +111,7 @@ const SocialLogin = (props) => {
           clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
           onSuccess={responseGoogle}
           onFailure={responseGoogle}
-          isSignedIn={true}
+          isSignedIn={false}
           buttonText="Continue with Google"
           disable={false}
           cookiePolicy={"single_host_origin"}

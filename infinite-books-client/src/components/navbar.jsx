@@ -1,5 +1,3 @@
-// TODO: redirect after login
-
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
@@ -140,6 +138,14 @@ function NavBar(props) {
                 </li>
               )}
 
+              {props.authLevel > 0 && (
+                <li className="nav-item" onClick={closeMobileMenu}>
+                  <Link to="/readers" className="nav-links">
+                    Readers
+                  </Link>
+                </li>
+              )}
+
               {(props.authLevel === 2 || props.authLevel === 3) && (
                 <li className="nav-item" onClick={closeMobileMenu}>
                   <Link to="/authors" className="nav-links">
@@ -148,13 +154,6 @@ function NavBar(props) {
                 </li>
               )}
 
-              {(props.authLevel === 1 || props.authLevel === 3) && (
-                <li className="nav-item" onClick={closeMobileMenu}>
-                  <Link to="/readers" className="nav-links">
-                    Readers
-                  </Link>
-                </li>
-              )}
               <li className="nav-btn">
                 {props.isAuth ? (
                   <Button

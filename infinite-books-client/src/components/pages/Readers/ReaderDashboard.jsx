@@ -45,10 +45,17 @@ function Dashboard(props) {
   const Auth = useContext(AuthContext);
   const [books, setBooks] = useState([]);
 
+  const [changeTriggered, setChangeTriggered] = useState(false);
   useEffect(() => {
     getCheckedOutBooks();
-    getReviewedBooks();
-  }, []);
+    //getReviewedBooks();
+  }, [changeTriggered]);
+
+  const handleTriggerChange = () => {
+    setChangeTriggered(!changeTriggered);
+  };
+
+  const [getBookStatus, setGetBookStatus] = useState("");
 
   const getCheckedOutBooks = () => {
     const checkedOutBooksUrl =
@@ -56,47 +63,51 @@ function Dashboard(props) {
     const payload = {
       user_uid: uid,
     };
+    setGetBookStatus("Retrieving your books...");
     axios
       .post(checkedOutBooksUrl, payload)
       .then((res) => {
         // console.log(res.data.result);
         let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
-        // console.log(uniqueBooks);
+        console.log(uniqueBooks);
         setBooks(uniqueBooks);
+        setGetBookStatus(
+          "You don't have any books checked out. Head over to the Books tab to check something out."
+        );
       })
       .catch((err) => {
         console.error(err);
       });
   };
 
-  const getReviewedBooks = () => {
-    const reviewedBooksUrl =
-      process.env.REACT_APP_SERVER_BASE_URI + "ReviewBySingleUser/" + uid;
-    const payload = {
-      user_uid: uid,
-    };
-    axios
-      .get(reviewedBooksUrl, payload)
-      .then((res) => {
-        console.log(res.data.result);
-        let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
-        console.log(uniqueBooks);
-        setBooks(uniqueBooks);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
+  // const getReviewedBooks = () => {
+  //   const reviewedBooksUrl =
+  //     process.env.REACT_APP_SERVER_BASE_URI + "ReviewBySingleUser/";
+  //   const payload = {
+  //     reader_id: uid,
+  //   };
+  //   axios
+  //     .post(reviewedBooksUrl, payload)
+  //     .then((res) => {
+  //       console.log(res.data.result);
+  //       let uniqueBooks = getUniqueListBy(res.data.result, "book_uid");
+  //       console.log(uniqueBooks);
+  //       setBooks(uniqueBooks);
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //     });
+  // };
 
   // https://stackoverflow.com/questions/2218999/remove-duplicates-from-an-array-of-objects-in-javascript
   const getUniqueListBy = (arr, key) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   };
 
-  //console.log(books);
   const bookCards = () => {
     let bookCardsArray = [];
     books.forEach((bookObject, index) => {
+      //console.log(bookObject);
       bookCardsArray.push(
         <BookCard
           key={index}
@@ -110,18 +121,16 @@ function Dashboard(props) {
           book_cover_image={bookObject["book_cover_image"]}
           description={bookObject["description"]}
           book_link={bookObject["book_link"]}
+          book_is_checked_out={
+            bookObject["status"] === "CHECKED OUT" ? true : false
+          }
         />
       );
     });
     if (bookCardsArray.length > 0) {
       return bookCardsArray;
     } else {
-      return (
-        <Typography>
-          You don't have any books checked out. Head on over to the Books tab to
-          check something out.
-        </Typography>
-      );
+      return <Typography>{getBookStatus}</Typography>;
     }
   };
 

@@ -1,3 +1,49 @@
+# Infinite Books
+
+#### James Goodman
+
+##### jalegoodman@gmail.com
+
+### BIG LIST OF BUGS AND TODOS
+
+# Get the TODO Tree VSCode extension (or similar) to see in code
+
+- :fire: BUGS :fire:
+
+  - AuthorBookSelector.jsx
+    - "Retrieving comments" message sometimes hangs and doesn't display comments from db until something like the edit button is clicked.
+  - BookCard.jsx:
+    - Some information, like book description and author name, is not correctly being passed to the component either from the Books page or the ReaderDashboard.
+  - FeaturedBook.jsx:
+    - The button does nothing, but should either open the bookcard for Balancing Act or check it out and navigate to the ReaderDashboard
+
+- :clown_face: TODO LIST :clown_face:
+  - General:
+    - Cookies are used around the site to get the user_uid, but it's possible that the Context should be used for that instead (for weirdos that have cookies disabled everywhere, this site will not work).
+  - Login.jsx:
+    - enter keypress submits form
+  - Signup.jsx:
+    - need to test more for error cases with both email and google signup, and make sure errors are handled and displayed correctly.
+    - password should have some complexity constraint
+    - the styles are a bit ugly, especially inputs
+    - stuff like bio etc. are never used on the site but exist in the db. Consider making profile pages for users.
+    - make first and last name required so books don't show up with a blank author name (this might already be the case, please check)
+    - tell the user to expect a confirmation email (alert not working)
+  - AddBook.jsx:
+    - snackbar not giving "good job" message on 200OK
+  - AuthorBookSelector.jsx:
+    - Styles could use some polish
+    - Re-render after editing a book, or deleting a book
+    - File is kinda big (like 950 lines), consider making the table its own component
+  - BookCard.jsx:
+    - Test the position of the modal, probably looks weird on smaller screens
+    - better styles/formatting for the modal (title, author, etc)
+    - Return Book button correctly changes the database, but the component should rerender to show that the book has been returned
+  - ReaderDashboard.jsx:
+    - Duplicate reviews exist for certain books from before the new comment system was implemented, which causes issues when trying to return a book. Before making the site live, scrub the DB of test/dummy data and that should fix the problem.
+  - ReadingPane.jsx:
+    - After submitting a comment, clear the textarea.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

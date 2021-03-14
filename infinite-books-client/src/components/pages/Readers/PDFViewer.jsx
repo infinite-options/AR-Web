@@ -15,7 +15,7 @@ const styles = {
   outer: {
     textAlign: "center",
     display: "inline-block",
-    marginTop: 35,
+    margin: "35px auto",
   },
   buttonGroup: {
     margin: 10,

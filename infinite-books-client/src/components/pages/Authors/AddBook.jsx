@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     margin: "0 auto",
     marginTop: 150,
-    height: 360,
+    height: 370,
     width: 600,
     padding: 10,
     position: "relative",
@@ -182,12 +182,13 @@ const AddBook = (props) => {
       genre: post.genre,
       num_pages: "", // determined dynamically when PDF loads
       description: post.description,
-      format: "pdf", // TODO if we ever allow uploads in other formats, don't hard code this
+      format: "pdf", // if we ever allow uploads in other formats, don't hard code this
       book_pdf: pdfFile.obj,
     };
 
     if (verifyBookInfo(bookInfo)) {
       let formData = new FormData();
+      console.log(bookInfo);
       Object.entries(bookInfo).forEach((entry) => {
         formData.append(entry[0], entry[1]);
       });
@@ -198,6 +199,9 @@ const AddBook = (props) => {
           let arr = [{ message: res.data.message }];
           console.log(arr);
           setStatus(res.status);
+          bookInfo.book_pdf = pdfFile.url;
+          bookInfo.book_cover_image = imgFile.url;
+          props.setBooks((books) => [...books, bookInfo]);
           //handleOpenSnackbar();
         })
         .catch((err) => {
@@ -220,6 +224,7 @@ const AddBook = (props) => {
     } else {
       console.error(file.type, ": this file type is not supported.");
     }
+    console.log(imgFile);
   };
 
   const verifyBookInfo = (bookInfo) => {
@@ -318,6 +323,7 @@ const AddBook = (props) => {
                 size="small"
                 variant="contained"
                 component="label"
+                color="primary"
                 style={{ marginTop: 20 }}
               >
                 {tempImgFile === "" ? (
@@ -339,6 +345,7 @@ const AddBook = (props) => {
                   size="small"
                   variant="contained"
                   component="label"
+                  color="secondary"
                   style={{ marginTop: 5 }}
                   onClick={() => setTempImgFile("")}
                 >
@@ -350,6 +357,7 @@ const AddBook = (props) => {
                 size="small"
                 variant="contained"
                 component="label"
+                color="primary"
                 style={{ marginTop: 20 }}
               >
                 {pdfFilename === "" ? (
@@ -402,6 +410,7 @@ const AddBook = (props) => {
               <Button
                 size="small"
                 variant="contained"
+                color="primary"
                 onClick={() => postNewBook()}
               >
                 Publish

@@ -1,7 +1,5 @@
 /* FIXME: 
- - long reviews should overflow in table cell, or click to show in modal
- - fix dropdown, I borked it
- - editing book cover and pdf does not work
+   "Retrieving comments" message sometimes hangs 
 
    TODO:
 - Style for title, genre and discription could use some polish
@@ -62,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     height: "auto",
+    marginLeft: 12,
   },
   gridTable: {
     marginLeft: "16px",
@@ -174,32 +173,40 @@ const useStyles = makeStyles((theme) => ({
 
 const AuthorBookSelector = (props) => {
   const classes = useStyles();
-
   const [selectedBook, setSelectedBook] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [comments, setComments] = useState([]);
 
-  useEffect(() => {}, [selectedBook, props]);
+  useEffect(() => {
+    console.log(selectedBook);
+    setComments([]);
+    getComments();
+  }, [selectedBook]);
 
   const handleSelect = (e) => {
     /*
     image : e.target.value.book_cover_image
     pdf: e.target.value.book_link
     */
-    console.log(e.target.value);
+
+    //console.log(e.target.value);
     setEditMode(false);
     setPage(0);
     setRowsPerPage(5);
     setTempImgFile("");
     setPdfFilename("");
-    //setImgFile(new File(e.target.value.book_link, e.target.value.book_link));
-    //console.log(imgFile);
-    setSelectedBook(e.target.value);
-    setBookIsSelected(true);
+    if (e.target.value !== "") {
+      console.log(e.target.value);
+      setSelectedBook(e.target.value);
+      setBookIsSelected(true);
+    }
   };
+
   const handleChangePage = (e, newPage) => {
     setPage(newPage);
   };
+
   const handleChangeRowsPerPage = (e) => {
     setRowsPerPage(parseInt(e.target.value, 10));
     setPage(0);
@@ -209,16 +216,55 @@ const AuthorBookSelector = (props) => {
     return { review, pageNum };
   }
 
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {}, [loading]);
+
+  const getComments = () => {
+    setLoading(true);
+    if (Object.keys(selectedBook).length !== 0) {
+      setReviewDisplayMsg("Retrieving comments...");
+      let allBookUids = props.reviews
+        .flat()
+        .filter((review) => review.title === selectedBook.title)
+        .map((bookObject) => ({
+          review_uid: bookObject.review_uid,
+        }));
+      let allComments = [];
+      const comments_url =
+        process.env.REACT_APP_SERVER_BASE_URI + "GetComments";
+      //console.log(comments_url);
+      allBookUids.forEach((bookUid) => {
+        axios
+          .post(comments_url, bookUid)
+          .then((res) => {
+            console.log(res);
+            res.data.result.forEach((commentObj) =>
+              allComments.push(commentObj)
+            );
+          })
+          .then(() => {
+            setLoading(false);
+            setComments(allComments);
+            setReviewDisplayMsg("No comments to display.");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      });
+    }
+  };
+
   const generateTableRows = () => {
-    let row = props.reviews
-      .flat()
-      .filter((review) => review.title === selectedBook.title)
-      .map((review) =>
-        review.page_num === null
-          ? createData(review.comments, "")
-          : createData(review.comments, review.page_num)
+    //console.log(comments);
+    if (comments.length > 0) {
+      let row = comments.map((comment) =>
+        comment.page_num === null
+          ? createData(comment.comments, "")
+          : createData(comment.comments, comment.page_num)
       );
-    return row;
+      //console.log(row);
+      return row;
+    }
   };
 
   const displayAuthorStats = () => {
@@ -239,7 +285,7 @@ const AuthorBookSelector = (props) => {
           ) : (
             <div>
               <Typography variant="h5">
-                Number of reviews: {props.stats.numReviews}
+                Number of check-outs: {props.stats.numReviews}
               </Typography>
             </div>
           )}
@@ -248,8 +294,10 @@ const AuthorBookSelector = (props) => {
     );
   };
 
-  const reviewTable = (props) => {
-    let rows = generateTableRows();
+  const [reviewDisplayMsg, setReviewDisplayMsg] = useState("");
+
+  const reviewTable = () => {
+    let rows = comments.length > 0 ? generateTableRows() : [];
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     return (
@@ -259,7 +307,7 @@ const AuthorBookSelector = (props) => {
             <TableHead>
               <TableRow>
                 <TableCell className={classes.tableColumnHeader}>
-                  Reviews for{" "}
+                  Comments for{" "}
                   <span style={{ fontStyle: "italic" }}>
                     {selectedBook.title}
                   </span>
@@ -270,17 +318,10 @@ const AuthorBookSelector = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.length === 0 && (
-                <TableCell component="th" scope="row">
-                  <div className={classes.tableTextContainer}>
-                    No reviews to display.
-                  </div>
-                </TableCell>
-              )}
               {rows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((rows, index) => (
-                  <TableRow key={rows.index}>
+                  <TableRow key={index}>
                     <TableCell component="th" scope="row">
                       <div className={classes.tableTextContainer}>
                         {rows.review}
@@ -293,6 +334,13 @@ const AuthorBookSelector = (props) => {
                     </TableCell>
                   </TableRow>
                 ))}
+              {loading && (
+                <TableCell component="th" scope="row">
+                  <div className={classes.tableTextContainer}>
+                    {reviewDisplayMsg}
+                  </div>
+                </TableCell>
+              )}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
                   <TableCell colSpan={6} />
@@ -319,10 +367,7 @@ const AuthorBookSelector = (props) => {
       <FormControl className={classes.formControl}>
         <span style={{ fontWeight: "bold", marginBottom: 5 }}>My books</span>
         <InputLabel className={classes.inputLabel}>Select a book</InputLabel>
-        <Select value={props.books[0]} onChange={handleSelect}>
-          <MenuItem value={""}>
-            <Typography>Select a book</Typography>
-          </MenuItem>
+        <Select onChange={handleSelect}>
           {props.books.map((book, index) => (
             <MenuItem value={book} key={index}>
               {book.title}
@@ -354,10 +399,10 @@ const AuthorBookSelector = (props) => {
       genre: "",
       description: "",
     });
-    // setImgFile({ obj: undefined, url: "" });
-    // setPdfFile({ obj: undefined, url: "" });
-    // setTempImgFile("");
-    // setPdfFilename("");
+    setImgFile({ obj: undefined, url: "" });
+    setPdfFile({ obj: undefined, url: "" });
+    setTempImgFile("");
+    setPdfFilename("");
     setError("");
   };
 
@@ -369,9 +414,8 @@ const AuthorBookSelector = (props) => {
   useEffect(() => {}, [imgFile, pdfFile, tempImgFile]);
 
   const handleFileUpload = (e) => {
-    console.log(e.target.files);
-    console.log(e.target.files[0]);
     const file = e.target.files[0];
+    console.log(file);
     if (file.type === "image/png" || file.type === "image/jpeg") {
       setTempImgFile(URL.createObjectURL(file));
       setImgFile({ obj: file, url: URL.createObjectURL(file) });
@@ -387,7 +431,29 @@ const AuthorBookSelector = (props) => {
   const [alertReason, setAlertReason] = React.useState("");
 
   const handleEditSubmit = () => {
-    const update_url = process.env.REACT_APP_SERVER_BASE_URI + "UpdateBook";
+    /*
+    /api/v2/UpdateBookImgOrPdf
+
+      this one is a form data and takes in the values:
+      book_uid
+      title
+      book_cover_image
+      book_pdf
+
+      api/v2/UpdateBook
+      {
+      "book_uid":"200-000024",
+      "data":{
+        "title":"Test Book 2",
+        "genre":"test4",
+        "description":"test5"
+        }
+      }
+  */
+
+    const updateFiles_url =
+      process.env.REACT_APP_SERVER_BASE_URI + "UpdateBookImgOrPdf";
+    const updateBook_url = process.env.REACT_APP_SERVER_BASE_URI + "UpdateBook";
 
     let bookToUpdate = {
       book_uid: selectedBook.book_uid,
@@ -395,32 +461,59 @@ const AuthorBookSelector = (props) => {
         title: post.title,
         genre: post.genre,
         description: post.description,
-        book_cover_image: imgFile.obj,
-        book_pdf: pdfFile.obj,
       },
     };
 
-    if (verifyBookInfo(bookToUpdate)) {
-      let formData = new FormData();
-      Object.entries(bookToUpdate).forEach((entry) => {
-        formData.append(entry[0], entry[1]);
+    axios
+      .post(updateBook_url, bookToUpdate)
+      .then((res) => {
+        console.log(res);
+        let arr = [{ message: res.data.message }];
+        console.log(arr);
+        setStatus(res.status);
+        console.log(imgFile.obj, pdfFile.obj);
+        if (imgFile.obj !== undefined || pdfFile.obj !== undefined) {
+          let fileInfo = {
+            title: selectedBook.title.split(" ").join("_"),
+            book_uid: selectedBook.book_uid,
+            book_cover_image: imgFile.obj,
+            book_pdf: pdfFile.obj,
+          };
+          // if (imgFile.obj !== undefined) {
+          //   fileInfo.book_cover_image = imgFile.obj;
+          //   console.log(fileInfo);
+          // }
+          // if (pdfFile.obj !== undefined) {
+          //   fileInfo.book_pdf = pdfFile.obj;
+          //   console.log(fileInfo);
+          // }
+
+          let formData = new FormData();
+          Object.entries(fileInfo).forEach((entry) => {
+            formData.append(entry[0], entry[1]);
+          });
+          axios
+            .post(updateFiles_url, formData)
+            .then((res) => {
+              console.log(res);
+              let arr = [{ message: res.data.message }];
+              console.log(arr);
+              setStatus(res.status);
+            })
+            .catch((err) => {
+              console.error(err);
+            });
+        }
+      })
+      .then(() => {
+        setAlertReason("Edited");
+        handleOpenSnackbar();
+        handleEditCancel();
+        clear();
+      })
+      .catch((err) => {
+        console.error(err);
       });
-      axios
-        .post(formData, bookToUpdate)
-        .then((res) => {
-          console.log(res);
-          let arr = [{ message: res.data.message }];
-          console.log(arr);
-          setStatus(res.status);
-          setAlertReason("Edited");
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-      handleOpenSnackbar();
-      handleEdit();
-      clear();
-    }
   };
 
   const handleEdit = () => {
@@ -762,11 +855,11 @@ const AuthorBookSelector = (props) => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogueClose} color="secondary">
-              Nevermind
-            </Button>
             <Button onClick={handleDelete} color="primary">
               Do it
+            </Button>
+            <Button onClick={handleDialogueClose} color="secondary">
+              Nevermind
             </Button>
           </DialogActions>
         </Dialog>
@@ -774,13 +867,19 @@ const AuthorBookSelector = (props) => {
     );
   };
 
-  const noBooksToDisplay = () => {
-    return (
-      <Typography variant={"subtitle2"}>
-        You don't currently have any books published. When you're ready, publish
-        a new book and you'll see your stats and reviews here.
-      </Typography>
-    );
+  const bookDisplayMsg = () => {
+    if (props.isLoading || props.isLoading === undefined) {
+      return (
+        <Typography variant={"subtitle2"}>Retrieving your books...</Typography>
+      );
+    } else {
+      return (
+        <Typography variant={"subtitle2"}>
+          You don't currently have any books published. When you're ready,
+          publish a new book and you'll see your stats and reviews here.
+        </Typography>
+      );
+    }
   };
 
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -831,7 +930,7 @@ const AuthorBookSelector = (props) => {
       <Grid item md={5} className={classes.gridDropdown}>
         <Paper className={classes.paper}>
           {props.books.length === 0 ? (
-            noBooksToDisplay()
+            bookDisplayMsg()
           ) : (
             <div>
               <div style={{ padding: 15 }}>{dropdownMenu(props)}</div>

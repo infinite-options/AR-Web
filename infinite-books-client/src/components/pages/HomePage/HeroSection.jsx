@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./HeroSection.css";
 import { Button } from "../../Button";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../Auth/AuthContext";
 
 /*
 Hero section: a customizable "page" of fixed-height
@@ -24,6 +25,28 @@ function HeroSection({
   imgStart,
   alt,
 }) {
+  const Auth = useContext(AuthContext);
+
+  const ConditionalLink = () => {
+    if (Auth.isAuth) {
+      return (
+        <Link to="/books">
+          <Button buttonSize="btn--wide" buttonColor="blue">
+            {buttonLabel}
+          </Button>
+        </Link>
+      );
+    } else {
+      return (
+        <Link to="/sign-up">
+          <Button buttonSize="btn--wide" buttonColor="blue">
+            {buttonLabel}
+          </Button>
+        </Link>
+      );
+    }
+  };
+
   return (
     <>
       <div
@@ -52,11 +75,7 @@ function HeroSection({
                 >
                   {description}
                 </p>
-                <Link to="/sign-up">
-                  <Button buttonSize="btn--wide" buttonColor="blue">
-                    {buttonLabel}
-                  </Button>
-                </Link>
+                {ConditionalLink()}
               </div>
             </div>
             <div className="col">
