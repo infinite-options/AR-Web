@@ -1,12 +1,10 @@
-##### Infinite Books
+# Infinite Books
 
-#### James Goodman
-
-### jalegoodman@gmail.com
+### James Goodman - jalegoodman@gmail.com
 
 ### BIG LIST OF BUGS AND TODOS
 
-## Get the TODO Tree VSCode extension (or similar) to see in code
+#### Get the TODO Tree VSCode extension (or similar) to see in code
 
 - :fire: BUGS :fire:
 
